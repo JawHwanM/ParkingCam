@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<color name="round_layout_border">#A1A7AE</color>
+	<color name="round_layout_background">#C5CCD4</color>	<!-- gray -->
+	<color name="table_head">#606060</color>
+	<color name="table_text">#ffffff</color>
+	
+	<color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="red">#FF0000</color>
+    <color name="blue">#0000ff</color>    
+    <color name="orange">#ED6200</color>    
+    <color name="transparent">#00000000</color>
+    <color name="silver">#c0c0c0</color>
+    <color name="gray">#808080</color>
+    <color name="darkgray">#606060</color>
+	<color name="darker_gray">#aaa</color>
+	<color name="android_green">#a5c639</color>
+    <drawable name="red">#7f00</drawable>
+    <drawable name="blue">#770000ff</drawable>
+    <drawable name="green">#00FF00</drawable>
+    
+	<drawable name="yellow">#77ffff00</drawable>
+	<drawable name="translucent_background_6">#60000000</drawable>
+	<drawable name="translucent_background_a">#a0000000</drawable>
+	<drawable name="translucent_background_e">#e0000000</drawable>
+	<drawable name="transparent">#00000000</drawable>
+	<drawable name="darkgrey">#606060</drawable>
+	
+</resources>

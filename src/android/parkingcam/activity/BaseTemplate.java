@@ -1,0 +1,187 @@
+/**
+	@file	BaseTemplate.java
+	@date	2015/08/10
+	@author	JawHwanM
+	@brief	기본 액티비티 템플릿
+*/
+package android.parkingcam.activity;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.parkingcam.ParkingCam;
+import android.parkingcam.R;
+import android.preference.PreferenceManager;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
+
+/**
+ * 기본적인 액티비티를 구현하기 위한 템플릿클래스
+ * @author JawHwanM
+ * @version 1.0
+ */
+public class BaseTemplate extends Activity
+{
+	private int mIntRayoutId		= 0;					/**< 레이아웃 ID */
+	protected Context mCtxContext	= null;					/**< 컨텍스트 */
+	protected SharedPreferences mSpfPrefer = null;			/**< 프레퍼런스*/
+	
+	/**
+	 * 템플릿 초기화
+	 * @param ctxContext 컨텍스트
+	 * @param intRayoutId 레이아웃ID
+	 */	
+	public void initTemplate(Context ctxContext, int intRayoutId)
+	{
+		mCtxContext		= ctxContext;
+		mIntRayoutId	= intRayoutId;
+		
+		setContentView(intRayoutId);
+		mSpfPrefer = PreferenceManager.getDefaultSharedPreferences(getContext());
+		setScreenOrientation();
+	}
+
+	/**
+	 * 템플릿 제거
+	 */		
+	public void releaseTemplate()
+	{
+		mSpfPrefer		= null;		
+		mCtxContext		= null;
+	}
+	
+	/**
+	 * 컨텍스트를 얻는다.
+	 */		
+	public Context getContext()
+	{
+		return mCtxContext;
+	}
+	
+	/**
+	 * 프레퍼런스를 얻는다.
+	 */
+	public SharedPreferences getPreferences()
+	{
+		return mSpfPrefer;
+	}	
+	
+	
+	/**
+	 * 화면 가로/세로보기 설정
+	 */	
+	public void setScreenOrientation()
+	{
+     	// 가로보기
+	    /*if(mSpfPrefer.getBoolean(Constants.LANDSCAPE_SCREEN_ENABLED_KEY, true) == true)
+	    	this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+	    else
+	    	this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);*/
+	    
+	    this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+	}
+	
+	
+	/**
+	 * 옵션메뉴 생성이벤트
+	 * @param mnuOptMenu 메뉴 
+	 */		
+    @Override
+	public boolean onCreateOptionsMenu(Menu mnuOptMenu)
+    {
+    	getMenuInflater().inflate(R.menu.parking_cam, mnuOptMenu);
+        return true;
+	}
+    
+    /**
+     * 옵션메뉴 선택이벤트
+	 * @param item 메뉴아이템
+     */    
+    @Override
+	public boolean onOptionsItemSelected(MenuItem item)
+    {
+    	switch (item.getItemId())
+        {
+    		case R.id.action_settings :
+				Intent itClient = new Intent(getApplicationContext(), ParkingCam.class);
+				startActivity(itClient);
+    			break;      		
+        }
+    	return super.onOptionsItemSelected(item);
+    }
+    
+    /**
+     * Toast 메시지를 보여준다.
+     * @param strMessage 메시지
+     */    
+    protected void showToastOnThread(final String strMessage)
+    {
+    	runOnUiThread(new Runnable()
+    	{     
+    		@Override
+			public void run()
+    		{
+    			if(mCtxContext != null && strMessage != null) Toast.makeText(mCtxContext, strMessage, Toast.LENGTH_SHORT).show();
+    		} 
+    	});
+    }    
+      
+    /**
+     * Dialog 메시지를 보여준다.
+     * @param strTitle 다이얼로그 제목 
+     * @param strMessage 메시지
+     */     
+    protected void showDialogOnThread(final String strTitle, final String strMessage)
+    {
+    	showDialogOnThread(strTitle, strMessage, -1);
+    }      
+    /**
+     * Dialog 메시지를 보여준다.
+     * @param strTitle 다이얼로그 제목 
+     * @param strMessage 메시지
+     * @param intTimeout 타임아웃(밀리세컨)
+     */       
+    protected void showDialogOnThread(final String strTitle, final String strMessage, final int intTimeout)
+    {
+    	runOnUiThread(new Runnable()
+    	{     
+    		@Override
+			public void run()
+    		{
+				AlertDialog.Builder adBuilder = new AlertDialog.Builder(mCtxContext); 
+				adBuilder.setTitle(strTitle); 
+				adBuilder.setMessage(strMessage);
+				if(intTimeout > -1)
+				{
+					adBuilder.setCancelable(true);
+				}
+				else
+				{
+					adBuilder.setPositiveButton(getString(R.string.common_confirm),  null);
+				}
+				final AlertDialog adDialog = adBuilder.create();
+				adDialog.show();   
+				if(intTimeout > -1)
+				{
+					final Timer tmTimer = new Timer();
+			        tmTimer.schedule(new TimerTask()
+			        {
+			            @Override
+						public void run()
+			            {
+			            	adDialog.dismiss(); 
+			                tmTimer.cancel();
+			            }
+			        }, intTimeout);
+				}
+    		} 
+    	});    	
+    }  
+}

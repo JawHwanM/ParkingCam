@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Common Start -->
     <string name="app_name">ParkingCam</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    
+    <string name="common_confirm">확인</string>
+    <!-- Common End -->
+    
+    <!-- ParkingCam Start -->
+    <string name="default_text">Text1234</string>
+    <string name="icon1">ICON1</string>
+    <!-- ParkingCam End -->
 
 </resources>
