@@ -300,6 +300,9 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 				if(Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB)
 					surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 			}
+			
+			mBoolScreenRequestPicture  = true;
+			requestCameraFocus();
 		}	
 	}
 
@@ -438,7 +441,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		mClsCaptureLayout.setMessage(getString(R.string.photo_request_camera_focus));
 		
 		mBoolFocusButtonPressed = true;
-		mClsCaptureLayout.drawFocusIcon(true, mBoolLandOrientation);  
+		mClsCaptureLayout.drawFocusIcon(false, mBoolLandOrientation);  
 		CameraMgr.getInstance().requestCameraFocus(mHdrMessageHandler);
 		CameraMgr.getInstance().requestAutoFocus();
 		return true;
