@@ -7,6 +7,7 @@
 
 package android.parkingcam.camera;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Calendar;
@@ -17,11 +18,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -57,20 +63,23 @@ import android.widget.Toast;
  */
 public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callback
 {
-	private String mStrCurDate 					= "";				/**< 현재 날짜/시각 */
-    private String mStrSavePath;   									/**< 저장 경로 	*/
+	private String mStrMessage					= "";					/**< Progress Message	*/
+	private String mStrCurDate 					= "";					/**< 현재 날짜/시각 */
+    private String mStrSavePath;   										/**< 저장 경로 	*/
     private String mStrSaveFolder 				= "/DCIM/parkingcam";	/**< 저장 폴더 	*/
 	
 	private CameraButton mBtnCamera				= null;		/**< 카메라(사진찍기) 버튼	*/
 	private LinearLayout mLlCameraNextMenu		= null;;	/**< 카메라 다음 메뉴 레이아웃	*/
 	
-	private boolean mBoolLandOrientation		= true;		/**< 가로(landscape) 모드 여부 */
+	private boolean mBoolFirstLoadind 			= false;	/**< 첫 로딩여부	*/
+	private boolean mBoolLandOrientation		= false;	/**< 가로(landscape) 모드 여부 */
 	private boolean mBoolScreenRequestPicture	= false;	/**< 화면사진 요청 여부	*/
 	private boolean mBoolSurfaceCreated			= false;	/**< surface 생성여부	*/
 	private boolean mBoolSdCardMounted			= true;		/**< SD 카드 마운트 가능여부 */
 	private boolean mBoolPreviewReady			= false;	/**< 프리뷰 준비 여부	*/
 	private boolean mBoolFocusButtonPressed		= false;	/**< 포커스 버튼 클릭 여부	*/
 
+	private ProgressDialog mProgressDialog;
 	private CaptureLayout mClsCaptureLayout;				/**< 캡쳐된 레이아웃	*/
 
 	private boolean mBoolSDCardRegister			= false;	/**< SD 카드 레지스터 여부	*/
@@ -114,7 +123,11 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
         String ext = Environment.getExternalStorageState();  
         if (ext.equals(Environment.MEDIA_MOUNTED)) 
         {  
-            mStrSavePath = Environment.getExternalStorageDirectory().getAbsolutePath() + mStrSaveFolder;  
+            mStrSavePath = Environment.getExternalStorageDirectory().getAbsolutePath() + mStrSaveFolder;
+            
+            File dir = new File(mStrSavePath);
+            if(dir.isDirectory() == false)
+            	dir.mkdirs();
         }
 	}
 	
@@ -175,8 +188,16 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	@Override  
 	public void onDestroy() 
 	{		
-		//File file = new File(mStrSavePath + File.separator + mStrCurDate+".png");
-		//if(file.exists()) file.delete();
+		mBtnCamera = null;
+		mLlCameraNextMenu = null;
+		
+		if(mProgressDialog != null)
+		{
+			mProgressDialog.dismiss();
+			mProgressDialog = null;
+		}
+		
+		mClsCaptureLayout = null;
 		
 		stopCamera();
 		super.onDestroy();
@@ -241,6 +262,9 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		});			
 		mClsCaptureLayout = (CaptureLayout)findViewById(R.id.clCaptureLayoutView);
 		if(mClsCaptureLayout != null) mClsCaptureLayout.setBackgroundColor(Color.TRANSPARENT);
+		
+		mStrMessage = getString(R.string.wait_capture) + getString(R.string.dot);
+		mProgressDialog = ProgressDialog.show(CameraCapture.this, getString(R.string.auto_capture), mStrMessage, true);
 	}
 	
 	/**
@@ -301,8 +325,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 					surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 			}
 			
-			mBoolScreenRequestPicture  = true;
-			requestCameraFocus();
+			if(!mBoolFirstLoadind) autoTakePicture();
 		}	
 	}
 
@@ -372,7 +395,6 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		mBoolPreviewReady = true;
 
 		mBoolLandOrientation = mSpfPrefer.getBoolean(Constants.LANDSCAPE_SCREEN_ENABLED_KEY, false);
-		
 		CameraMgr.getInstance().openDriver(mBoolLandOrientation, surfaceHolder);
 		CameraMgr.getInstance().startPreview();
 	}
@@ -523,10 +545,11 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			          				padZeros(calTraceDate.get(Calendar.HOUR_OF_DAY), 2)+
 			          				padZeros(calTraceDate.get(Calendar.MINUTE), 2)+
 			          				padZeros(calTraceDate.get(Calendar.SECOND), 2);
-					
 					// 사진 임시 저장 
+			        msgData.obj = byteArrayToBitmap((byte[])msgData.obj);
 					fosImage = new FileOutputStream(mStrSavePath + File.separator + mStrCurDate+".png");
 					fosImage.write((byte[])msgData.obj, 0, ((byte[]) msgData.obj).length);
+					
 					fosImage.close();
 					compareTime("이미지 저장 끝");
 					
@@ -535,6 +558,9 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 					
 					stopCamera();
 					toggleCameraButton(false);
+					
+					mProgressDialog.dismiss();
+	        		mProgressDialog = null;
 				}
 				catch (Exception e) 
 				{
@@ -679,9 +705,52 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		long lngBackupTime = mLngCurTime;
 		Calendar now = Calendar.getInstance();
 		long lngCurTime = now.getTimeInMillis();
-		System.out.println("*CompareTime");
+		System.out.println("*CompareTime : "+strStatus);
 		System.out.println("lngBackupTime : "+lngBackupTime);
 		System.out.println("lngCurTime : "+lngCurTime);
 		mLngCurTime = lngCurTime;
 	}
+	
+	/**
+	 * 일정 시간뒤에 자동 촬영을 한다.
+	 */
+	public void autoTakePicture()
+	{
+		mBoolFirstLoadind = true;
+		// 2초 뒤 자동촬영
+		CountDownTimer cdTimer = new CountDownTimer(Constants.COUNTDOWN_MAX, 1000)
+		{
+	        @Override
+	        public void onTick(long millisUntilFinished)
+	        {
+	        	mStrMessage += getString(R.string.dot);
+	        	mProgressDialog.setMessage(mStrMessage);
+	        }
+
+	        @Override
+	        public void onFinish() 
+	        {
+	        	mBoolScreenRequestPicture  = true;
+	        	requestCameraFocus();
+	        }
+	    };
+	    cdTimer.start();	
+	}	
+	
+	public byte[] byteArrayToBitmap(byte[] byteData) 
+    {  
+        Bitmap bitmap = BitmapFactory.decodeByteArray(byteData, 0, byteData.length);
+        int width = bitmap.getWidth(); 
+		int height = bitmap.getHeight(); 
+
+		Matrix matrix = new Matrix();
+		matrix.postRotate(90);
+
+		Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+    	ByteArrayOutputStream stream = new ByteArrayOutputStream();  
+    	resizedBitmap.compress(CompressFormat.JPEG, 100, stream);
+    	
+    	byte[] byteArray = stream.toByteArray();
+        return byteArray;
+    }
 }

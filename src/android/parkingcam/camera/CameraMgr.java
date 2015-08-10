@@ -42,7 +42,7 @@ public class CameraMgr
 	private boolean mBoolPreviewing;						/**< 미리보기 모드 여부 */
 	private Handler mHdrParentMessageHandler;				/**< 부모의 메시지 핸들러 */				
 	private SurfaceHolder mShParentSurfaceHolder = null;	/**< 부모의 surface 홀더 */
-	private boolean mBoolLandOrientation = true;
+	private boolean mBoolLandOrientation = false;
   
 	Camera.PictureCallback mLsnrPictureListener = new Camera.PictureCallback()
 	{
@@ -236,7 +236,6 @@ public class CameraMgr
 			pmParams.setPreviewSize(szCamSize.width, szCamSize.height);
 			pmParams.setPictureSize(szCamSize.width, szCamSize.height);
 			pmParams.setWhiteBalance(Parameters.WHITE_BALANCE_AUTO);
-			
 			mCmrCamera.setParameters(pmParams);
 		}
 	}

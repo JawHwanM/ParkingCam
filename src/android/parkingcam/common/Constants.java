@@ -24,4 +24,6 @@ package android.parkingcam.common;
 public class Constants 
 {
 	public static final String LANDSCAPE_SCREEN_ENABLED_KEY		= "landscape_screen_enabled";	/**< 화면 가로/세로 보기 키*/
+	
+	public static final int COUNTDOWN_MAX = 3000;	/**< 사진촬영 지연시간	**/
 }
