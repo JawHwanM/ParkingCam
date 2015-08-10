@@ -27,4 +27,7 @@
 	<drawable name="transparent">#00000000</drawable>
 	<drawable name="darkgrey">#606060</drawable>
 	
+	
+	<color name="photo_capturelayout_frame">#ff000000</color>
+	<color name="photo_capturelayout_mask">#60000000</color>
 </resources>

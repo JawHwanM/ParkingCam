@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="fill_parent" android:layout_height="fill_parent">
+	<SurfaceView android:id="@+id/surfaceview_preview" android:layout_width="fill_parent" android:layout_height="fill_parent" />
+    <RelativeLayout android:layout_width="fill_parent" android:layout_height="fill_parent">
+	    <android.parkingcam.common.CameraButton
+	            android:id="@+id/btnClose"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_alignParentRight="true"
+	            android:layout_alignParentTop="true"
+	            android:layout_marginRight="22dip"
+                android:layout_marginTop="22dip"/>
+
+	    <android.parkingcam.common.CameraButton
+	            android:id="@+id/btnCamera"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_centerHorizontal="true"
+	            android:layout_alignParentBottom="true"
+	            android:layout_marginBottom="14dip"/>
+	    	  
+  		<LinearLayout	android:id="@+id/llCameraNextMenu"
+  		    			android:orientation="horizontal"
+      			 		android:layout_width="wrap_content"
+      			 		android:layout_height="wrap_content"
+	            		android:layout_centerHorizontal="true"
+	            		android:layout_alignParentBottom="true"
+      			 		android:background="@color/transparent"
+      			 		android:visibility="invisible"
+      			 		android:layout_marginBottom="14dip">
+      		<TableLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:stretchColumns="3" android:orientation="horizontal">
+				<TableRow>
+				    <LinearLayout android:layout_width="wrap_content" android:layout_gravity="center" android:orientation="horizontal">
+					    <android.parkingcam.common.CameraButton
+					            android:id="@+id/btnTakePicture"
+					            android:layout_width="wrap_content"
+					            android:layout_height="wrap_content"
+					            android:layout_gravity="center"/>
+				    </LinearLayout>
+				</TableRow>
+			</TableLayout>
+		</LinearLayout>	    	    
+	</RelativeLayout>
+  	<android.parkingcam.camera.CaptureLayout android:id="@+id/clCaptureLayoutView"
+      			 android:layout_width="fill_parent" android:layout_height="fill_parent"
+      			 android:background="@color/transparent"/>
+</FrameLayout>

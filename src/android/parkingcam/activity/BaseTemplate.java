@@ -184,4 +184,20 @@ public class BaseTemplate extends Activity
     		} 
     	});    	
     }  
+    
+    /**
+     * 날짜 타입에 0을 붙인다.
+     * @return
+     */
+    protected String padZeros(int intDate, int length)
+    {
+    	String strCalDate = Integer.toString(intDate);
+    	double dblMax = Math.pow(10, length);
+    	if(intDate < dblMax)
+    	{
+    		strCalDate = "0" + strCalDate;
+    	}
+    	
+    	return strCalDate;
+    }
 }

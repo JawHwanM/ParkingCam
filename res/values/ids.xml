@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<item type="id" name="PHOTO_CAMERA_MGR_REQUST_PICTURE"/>
+	<item type="id" name="PHOTO_CAMERA_MGR_FOCUS_SUCCEDED"/>
+	<item type="id" name="PHOTO_CAMERA_MGR_FOCUS_FAILED"/>
+	<item type="id" name="PHOTO_CAMERA_START"/>
+	<item type="id" name="PHOTO_RESTART_CAPTURE_MODE"/>
+	<item type="id" name="PHOTO_UPLOAD_FINISHED"/>	
+	<item type="id" name="PHOTO_IS_NULL"/>
+</resources>

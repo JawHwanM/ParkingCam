@@ -10,7 +10,26 @@
     
     <!-- ParkingCam Start -->
     <string name="default_text">Text1234</string>
-    <string name="icon1">ICON1</string>
+    <string name="parking_take_picture">촬영</string>
+    <string name="icon2">ICON_2</string>
+    <string name="icon3">ICON_3</string>
+    <string name="icon4">ICON_4</string>
+    <string name="icon5">ICON_5</string>
+    <string name="icon6">ICON_6</string>
+    <string name="icon7">ICON_7</string>
+    <string name="icon8">ICON_8</string>
     <!-- ParkingCam End -->
 
+	<!-- CameraCapture Start -->
+	<string name="camera_capture">Camera Capture</string>
+	<string name="photo_no">등록된 사진이 없습니다.</string> 
+	<string name="photo_request_camera_focus">자동 포커스 설정중...</string>
+	<string name="photo_request_camera_take_picture">사진 캡쳐중...</string>
+	<string name="photo_status_default_msg">캡쳐를 실행하기 위해 카메라 버튼을 누르십시요.</string>
+	<string name="photo_upload_dialog_title">업로드중:</string>
+	<string name="photo_upload_dialog_message">잠시 기다려주십시오.</string>
+	<string name="photo_sd_card_wait">잠시만 기다려주십시요.</string>
+    <string name="photo_sd_card_preparing">SD카드 준비중</string>
+    <string name="photo_sd_card_unmount">앱을 이용하시려면 SD카드가 필요합니다.</string>
+    <!-- CameraCapture End -->
 </resources>

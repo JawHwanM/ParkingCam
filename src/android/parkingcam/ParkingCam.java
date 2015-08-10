@@ -7,8 +7,10 @@
 
 package android.parkingcam;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.parkingcam.activity.BaseTemplate;
+import android.parkingcam.camera.CameraCapture;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -88,13 +90,84 @@ public class ParkingCam extends BaseTemplate
 	 */ 
     private void initViewControl()
     {
-    	final Button btnIcon1 = (Button)findViewById(R.id.btnIcon1);
-    	btnIcon1.setOnClickListener(new OnClickListener()
+    	final Button btnTake = (Button)findViewById(R.id.btnTake);
+    	btnTake.setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View v) 
 			{
-				showToastOnThread("ICON1 Click!");
+				Intent itCameraCapture = new Intent(v.getContext(), CameraCapture.class);
+				startActivityForResult(itCameraCapture, 0);
+			}		
+    	});
+    	
+    	final Button btnIcon2 = (Button)findViewById(R.id.btnIcon2);
+    	btnIcon2.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				showToastOnThread("ICON_2 Click!");
+			}		
+    	});
+    	
+    	final Button btnIcon3 = (Button)findViewById(R.id.btnIcon3);
+    	btnIcon3.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				showToastOnThread("ICON_3 Click!");
+			}		
+    	});
+    	
+    	final Button btnIcon4 = (Button)findViewById(R.id.btnIcon4);
+    	btnIcon4.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				showToastOnThread("ICON_4 Click!");
+			}		
+    	});
+    	
+    	final Button btnIcon5 = (Button)findViewById(R.id.btnIcon5);
+    	btnIcon5.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				showToastOnThread("ICON_5 Click!");
+			}		
+    	});
+    	
+    	final Button btnIcon6 = (Button)findViewById(R.id.btnIcon6);
+    	btnIcon6.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				showToastOnThread("ICON_6 Click!");
+			}		
+    	});
+    	
+    	final Button btnIcon7 = (Button)findViewById(R.id.btnIcon7);
+    	btnIcon7.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				showToastOnThread("ICON_7 Click!");
+			}		
+    	});
+    	
+    	final Button btnIcon8 = (Button)findViewById(R.id.btnIcon8);
+    	btnIcon8.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				showToastOnThread("ICON_8 Click!");
 			}		
     	});
     }
