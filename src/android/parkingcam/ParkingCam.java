@@ -58,6 +58,7 @@ public class ParkingCam extends BaseTemplate
     	
     	if(AppContext.getAppFirstLoading() == false)
     	{
+    		//TODO:: 사용 설명서 삽입
     		showToastOnThread("First Loading!");
     		AppContext.setAppFirstLoading(true);
     	}

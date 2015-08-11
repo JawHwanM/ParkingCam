@@ -49,7 +49,7 @@ public class CameraMgr
 		@Override
 		public void onPictureTaken(byte[] bytData, Camera cmrCamera)
 		{			
-			CameraCapture.compareTime("JPG 생성시작");
+			//CameraCapture.compareTime("JPG 생성시작");
 			if (bytData == null)
 			{
 				//
@@ -60,7 +60,7 @@ public class CameraMgr
 				message.sendToTarget();
 				mHdrParentMessageHandler = null;
 				mCmrCamera.startPreview();
-				CameraCapture.compareTime("핸들러에게 이미지 전달");
+				//CameraCapture.compareTime("핸들러에게 이미지 전달");
 			}
       }
 	};

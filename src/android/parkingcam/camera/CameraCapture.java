@@ -41,11 +41,13 @@ import android.parkingcam.common.CameraButton;
 import android.parkingcam.common.Constants;
 import android.parkingcam.widget.ParkingWidgetProvider;
 import android.util.DisplayMetrics;
+import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnDragListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -67,9 +69,10 @@ import android.widget.Toast;
  */
 public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callback
 {
-	private String mStrMessage					= "";					/**< Progress Message	*/
-	private String mStrCurDate 					= "";					/**< 현재 날짜/시각 */
-    private String mStrSavePath;   										/**< 저장 경로 	*/
+	private String mStrMessage					= "";		/**< Progress Message	*/
+	private String mStrCurDate 					= "";		/**< 현재 날짜/시각 */
+    private String mStrSavePath;   							/**< 저장 경로 	*/
+    private byte[]	mByteImgData				= null;
 	
 	private CameraButton mBtnCamera				= null;		/**< 카메라(사진찍기) 버튼	*/
 	private LinearLayout mLlCameraNextMenu		= null;;	/**< 카메라 다음 메뉴 레이아웃	*/
@@ -191,6 +194,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	@Override  
 	public void onDestroy() 
 	{		
+		mByteImgData = null;
 		mBtnCamera = null;
 		mLlCameraNextMenu = null;
 		
@@ -253,21 +257,65 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		mLlCameraNextMenu = (LinearLayout)findViewById(R.id.llCameraNextMenu);
 		mLlCameraNextMenu.setVisibility(View.GONE);
 		
-		CameraButton btnTakePicture = (CameraButton)findViewById(R.id.btnTakePicture);			
-		btnTakePicture.setImage(R.drawable.icn_camera, 0, 0);
-		btnTakePicture.setOnClickListener(new OnClickListener()
+		CameraButton btnMap = (CameraButton)findViewById(R.id.btnMap);			
+		btnMap.setImage(R.drawable.compass, 0, 0);
+		btnMap.setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
 			{
-				startCameraCapture();
+				showToastOnThread("Map...");
 			}
-		});			
+		});
+		
+		CameraButton btnSave = (CameraButton)findViewById(R.id.btnSave);			
+		btnSave.setImage(R.drawable.icn_camera_black, 0, 0);
+		btnSave.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				doSaveImage();
+			}
+		});
+		
+		
+		
 		mClsCaptureLayout = (CaptureLayout)findViewById(R.id.clCaptureLayoutView);
-		if(mClsCaptureLayout != null) mClsCaptureLayout.setBackgroundColor(Color.TRANSPARENT);
+		if(mClsCaptureLayout != null) 
+		{
+			mClsCaptureLayout.setBackgroundColor(Color.TRANSPARENT);
+			mClsCaptureLayout.setOnDragListener(new OnDragListener()
+			{
+				@Override
+				public boolean onDrag(View v, DragEvent event) 
+				{
+					return false;
+				}
+				
+			});
+		}
 		
 		mStrMessage = getString(R.string.wait_capture) + getString(R.string.dot);
 		mProgressDialog = ProgressDialog.show(CameraCapture.this, getString(R.string.auto_capture), mStrMessage, true);
+	}
+	
+	/**
+	 * 카메라 버튼 변경
+	 * @param boolEnable
+	 */
+	public void toggleCameraButton(boolean boolEnable)
+	{
+		if(boolEnable == true)
+		{
+			mBtnCamera.setVisibility(View.VISIBLE);
+			mLlCameraNextMenu.setVisibility(View.GONE);
+		}
+		else
+		{
+			mBtnCamera.setVisibility(View.GONE);
+			mLlCameraNextMenu.setVisibility(View.VISIBLE);
+		}
 	}
 	
 	/**
@@ -285,24 +333,65 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	}
 	
 	/**
-	 * 카메라 버튼 변경
-	 * @param boolEnable
+	 * SD 카드의 상태를 얻는다.
+	 * @return 
 	 */
-	public void toggleCameraButton(boolean boolEnable)
+	public static boolean checkSDCardState()
 	{
-		if(boolEnable == true)
+		boolean boolResult = true;
+		String strSDCardState = Environment.getExternalStorageState();
+		if (strSDCardState.compareTo(Environment.MEDIA_MOUNTED) != 0)
 		{
-			mBtnCamera.setVisibility(View.VISIBLE);
-			mLlCameraNextMenu.setVisibility(View.GONE);
-			
-			File file = new File(mStrSavePath + File.separator + mStrCurDate+".png");
-			if(file.exists()) file.delete();
+			boolResult = false;
 		}
-		else
+		return boolResult;
+	}
+	
+	/*
+	 * ----------------------------------------------------------------------------------------
+	 * 카메라 관련
+	 * ----------------------------------------------------------------------------------------
+	 */
+	
+	/**
+	 * 카메라 surface 생성
+	 */
+	@Override
+	public void surfaceCreated(SurfaceHolder shHolder) 
+	{
+		if(mBoolSurfaceCreated == false) 
 		{
-			mBtnCamera.setVisibility(View.GONE);
-			mLlCameraNextMenu.setVisibility(View.VISIBLE);
+			mBoolSurfaceCreated = true;
+			setCameraSurfaceHolder(shHolder);
+			mHdrMessageHandler.sendEmptyMessage(R.id.PHOTO_CAMERA_START);
 		}
+	}
+	
+	/**
+	 * 카메라 surface 변경
+	 */
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) 
+	{
+		
+	}
+	
+	/**
+	 * 카메라 surface 소멸
+	 */
+	@Override
+	public void surfaceDestroyed(SurfaceHolder holder) 
+	{
+		mBoolSurfaceCreated = false;		
+	}
+	
+	/**
+	 * 카메라의 surface holder를 세팅한다.
+	 */
+	private void setCameraSurfaceHolder(SurfaceHolder surfaceHolder)
+	{
+		if (surfaceHolder == null || CameraMgr.getInstance() == null) return;
+		CameraMgr.getInstance().setSurfaceHolder(surfaceHolder);
 	}
 	
 	/**
@@ -340,53 +429,6 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	{
 		checkStorageState(false);
 		stopCamera();		
-	}
-	
-	/**
-	 * 카메라 surface 변경
-	 */
-	@Override
-	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) 
-	{
-		
-	}
-	
-	/**
-	 * 카메라 surface 생성
-	 */
-	@Override
-	public void surfaceCreated(SurfaceHolder shHolder) 
-	{
-		if(mBoolSurfaceCreated == false) 
-		{
-			mBoolSurfaceCreated = true;
-			setCameraSurfaceHolder(shHolder);
-			mHdrMessageHandler.sendEmptyMessage(R.id.PHOTO_CAMERA_START);
-		}
-	}
-	
-	/**
-	 * 카메라 surface 소멸
-	 */
-	@Override
-	public void surfaceDestroyed(SurfaceHolder holder) 
-	{
-		mBoolSurfaceCreated = false;		
-	}
-	
-	/*
-	 * ----------------------------------------------------------------------------------------
-	 * 카메라 관련
-	 * ----------------------------------------------------------------------------------------
-	 */
-
-	/**
-	 * 카메라의 surface holder를 세팅한다.
-	 */
-	private void setCameraSurfaceHolder(SurfaceHolder surfaceHolder)
-	{
-		if (surfaceHolder == null || CameraMgr.getInstance() == null) return;
-		CameraMgr.getInstance().setSurfaceHolder(surfaceHolder);
 	}
 
 	/**
@@ -454,6 +496,20 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 
 		return super.onKeyDown(keyCode, event);
 	}
+	
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) 
+	{
+		switch (keyCode)
+		{
+			case KeyEvent.KEYCODE_FOCUS :
+				mBoolFocusButtonPressed = false;
+				mClsCaptureLayout.drawFocusIcon(false, mBoolLandOrientation);
+				mClsCaptureLayout.drawFocused(false, false);
+				return true;
+		}
+		return super.onKeyUp(keyCode, event);
+	}
 
 	/**
 	 * 카메라 포커스 요청
@@ -486,7 +542,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		
 		if (mBoolPreviewReady)
 		{
-			compareTime("requestCameraTakePicture()");
+			//compareTime("requestCameraTakePicture()");
 			mClsCaptureLayout.setMessage(getString(R.string.photo_request_camera_take_picture));
 			mClsCaptureLayout.drawFocused(false, false);
 			mClsCaptureLayout.drawFocusIcon(false, mBoolLandOrientation);
@@ -495,20 +551,6 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			return true;
 		}
 		return false;
-	}
-	
-	@Override
-	public boolean onKeyUp(int keyCode, KeyEvent event) 
-	{
-		switch (keyCode)
-		{
-			case KeyEvent.KEYCODE_FOCUS :
-				mBoolFocusButtonPressed = false;
-				mClsCaptureLayout.drawFocusIcon(false, mBoolLandOrientation);
-				mClsCaptureLayout.drawFocused(false, false);
-				return true;
-		}
-		return super.onKeyUp(keyCode, event);
 	}
 	
 	/*
@@ -559,32 +601,10 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			// ---------------------------------------------------------------
 		case R.id.PHOTO_CAMERA_MGR_REQUST_PICTURE :	// JPG로 파일출력
 			
-			compareTime("이미지 저장 시작");
-			
-			FileOutputStream fosImage = null;
 			try
 			{
-				Calendar calTraceDate = Calendar.getInstance();
-				mStrCurDate = "";
-		        mStrCurDate = 	Integer.toString(calTraceDate.get(Calendar.YEAR))+
-		          				padZeros(calTraceDate.get(Calendar.MONTH)+1, 2)+
-		          				padZeros(calTraceDate.get(Calendar.DAY_OF_MONTH), 2)+
-		          				padZeros(calTraceDate.get(Calendar.HOUR_OF_DAY), 2)+
-		          				padZeros(calTraceDate.get(Calendar.MINUTE), 2)+
-		          				padZeros(calTraceDate.get(Calendar.SECOND), 2);
-				// 사진 임시 저장 
-		        msgData.obj = byteArrayToBitmap((byte[])msgData.obj);
-				fosImage = new FileOutputStream(mStrSavePath + File.separator + mStrCurDate+".png");
-				fosImage.write((byte[])msgData.obj, 0, ((byte[]) msgData.obj).length);
-				
-				fosImage.close();
-				compareTime("이미지 저장 끝");
-				
-				AppWidgetManager appWidgetMgr = AppWidgetManager.getInstance(this);
-				Intent itUpdate = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-				itUpdate.setClass(this, ParkingWidgetProvider.class);
-				itUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetMgr.getAppWidgetIds(new ComponentName(this, ParkingWidgetProvider.class)));
-				this.sendBroadcast(itUpdate);
+				//compareTime("이미지 데이터 저장 시작");
+				mByteImgData = (byte[])msgData.obj;
 				
 				mBoolTakePhotoProgress = false;
 				mClsCaptureLayout.setMessage("");
@@ -593,19 +613,20 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 				toggleCameraButton(false);
 				
 				mProgressDialog.dismiss();
-        		mProgressDialog = null;
+	    		mProgressDialog = null;
 			}
-			catch (Exception e) 
+			catch(Exception ex)
 			{
 				mBoolTakePhotoProgress = false;
 				mClsCaptureLayout.setMessage("");
 				mHdrMessageHandler.sendEmptyMessage(R.id.PHOTO_RESTART_CAPTURE_MODE);
+				ex.printStackTrace();
 			}
 			finally
 			{
-				fosImage = null;
 				msgData.obj = null;
 			}
+			
 			break;
 			// ---------------------------------------------------------------	
 		case R.id.PHOTO_UPLOAD_FINISHED :	// 전송완료
@@ -643,25 +664,6 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		}
 	}
 
-	/**
-	 * SD카드의 상태를 출력한다.
-	 */
-	private void checkStorageState(boolean boolShow)
-	{
-		String strState = Environment.getExternalStorageState();
-		int intResId = 0;
-
-		if (strState == Environment.MEDIA_CHECKING) 
-			intResId = R.string.photo_sd_card_preparing;
-		else 
-			intResId = R.string.photo_sd_card_unmount;
-		
-		if(boolShow) 
-		{
-			Toast.makeText(CameraCapture.this, getString(intResId), Toast.LENGTH_LONG).show();
-		} 
-	}
-
 	private final BroadcastReceiver mBrSDcardEventListener = new BroadcastReceiver() 
 	{
 		@Override
@@ -696,50 +698,24 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			}
 		}
 	}; 	
-
-	/**
-	 * SD 카드의 상태를 얻는다.
-	 * @return 
-	 */
-	public static boolean checkSDCardState()
-	{
-		boolean boolResult = true;
-		String strSDCardState = Environment.getExternalStorageState();
-		if (strSDCardState.compareTo(Environment.MEDIA_MOUNTED) != 0)
-		{
-			boolResult = false;
-		}
-		return boolResult;
-	}
-
-	/**
-	 * 기기 소리를 켠다(알림음)
-	 */
-	private void playSoundOnFocus()
-	{
-		ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_SYSTEM, 100);
-		tg.startTone(ToneGenerator.TONE_PROP_BEEP2);
-	}
-
-	/**
-	 * 기기 진동을 준다
-	 */
-	private void vibrate()
-	{
-		Vibrator vibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
-		vibrator.vibrate(200);
-	}
 	
-	private static long mLngCurTime = 0;
-	public static void compareTime(String strStatus)
+	/**
+	 * SD카드의 상태를 출력한다.
+	 */
+	private void checkStorageState(boolean boolShow)
 	{
-		long lngBackupTime = mLngCurTime;
-		Calendar now = Calendar.getInstance();
-		long lngCurTime = now.getTimeInMillis();
-		System.out.println("*CompareTime : "+strStatus);
-		System.out.println("lngBackupTime : "+lngBackupTime);
-		System.out.println("lngCurTime : "+lngCurTime);
-		mLngCurTime = lngCurTime;
+		String strState = Environment.getExternalStorageState();
+		int intResId = 0;
+
+		if (strState == Environment.MEDIA_CHECKING) 
+			intResId = R.string.photo_sd_card_preparing;
+		else 
+			intResId = R.string.photo_sd_card_unmount;
+		
+		if(boolShow) 
+		{
+			Toast.makeText(CameraCapture.this, getString(intResId), Toast.LENGTH_LONG).show();
+		} 
 	}
 	
 	/**
@@ -766,7 +742,54 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	        }
 	    };
 	    cdTimer.start();	
-	}	
+	}
+	
+	/**
+	 * 이미지 저장을 한다
+	 */
+	public void doSaveImage()
+	{
+		//compareTime("이미지 저장 시작");
+		FileOutputStream fosImage = null;
+		try
+		{
+			Calendar calTraceDate = Calendar.getInstance();
+	        mStrCurDate = 	Integer.toString(calTraceDate.get(Calendar.YEAR))+
+	          				padZeros(calTraceDate.get(Calendar.MONTH)+1, 2)+
+	          				padZeros(calTraceDate.get(Calendar.DAY_OF_MONTH), 2)+
+	          				padZeros(calTraceDate.get(Calendar.HOUR_OF_DAY), 2)+
+	          				padZeros(calTraceDate.get(Calendar.MINUTE), 2)+
+	          				padZeros(calTraceDate.get(Calendar.SECOND), 2);
+			// 사진 임시 저장 
+	        mByteImgData = byteArrayToBitmap(mByteImgData);
+			fosImage = new FileOutputStream(mStrSavePath + File.separator + mStrCurDate+".png");
+			fosImage.write(mByteImgData, 0, mByteImgData.length);
+			
+			fosImage.close();
+			//compareTime("이미지 저장 끝");
+			
+			AppWidgetManager appWidgetMgr = AppWidgetManager.getInstance(this);
+			Intent itUpdate = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+			itUpdate.setClass(this, ParkingWidgetProvider.class);
+			itUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetMgr.getAppWidgetIds(new ComponentName(this, ParkingWidgetProvider.class)));
+			this.sendBroadcast(itUpdate);
+			
+			showToastOnThread("Image Save Success");
+		}
+		catch (Exception e) 
+		{
+			mBoolTakePhotoProgress = false;
+			mClsCaptureLayout.setMessage("");
+			mHdrMessageHandler.sendEmptyMessage(R.id.PHOTO_RESTART_CAPTURE_MODE);
+		}
+		finally
+		{
+			fosImage = null;
+			mByteImgData = null;
+			mStrCurDate = "";
+			finish();
+		}
+	}
 	
 	public byte[] byteArrayToBitmap(byte[] byteData) 
     {  
@@ -784,4 +807,31 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
     	byte[] byteArray = stream.toByteArray();
         return byteArray;
     }
+	
+	/**
+	 * 기기 소리를 켠다(알림음)
+	 */
+	private void playSoundOnFocus()
+	{
+		ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_SYSTEM, 100);
+		tg.startTone(ToneGenerator.TONE_PROP_BEEP2);
+	}
+
+	/**
+	 * 기기 진동을 준다
+	 */
+	private void vibrate()
+	{
+		Vibrator vibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
+		vibrator.vibrate(200);
+	}
+	
+	/*private static long mLngCurTime = 0;
+	public static void compareTime(String strStatus)
+	{
+		long lngBackupTime = mLngCurTime;
+		Calendar now = Calendar.getInstance();
+		long lngCurTime = now.getTimeInMillis();
+		mLngCurTime = lngCurTime;
+	}*/
 }

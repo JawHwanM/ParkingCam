@@ -20,6 +20,7 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.parkingcam.R;
 import android.parkingcam.common.Constants;
+import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -146,8 +147,18 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 		RemoteViews updateViews = new RemoteViews(context.getPackageName(), R.layout.parking_widget);		
 		
 		mStrImage = setImage();
-		if("".equals(mStrImage) == false)	updateViews.setImageViewBitmap(R.id.parkingImg, BitmapFactory.decodeFile(mStrImage));
-		else								updateViews.setImageViewResource(R.id.parkingImg, R.drawable.icn_camera);
+		if("".equals(mStrImage) == false)
+		{
+			updateViews.setViewVisibility(R.id.btnClose, View.VISIBLE);
+			updateViews.setViewVisibility(R.id.btnGPS, View.VISIBLE);
+			updateViews.setImageViewBitmap(R.id.parkingImg, BitmapFactory.decodeFile(mStrImage));
+		}
+		else
+		{
+			updateViews.setViewVisibility(R.id.btnClose, View.GONE);
+			updateViews.setViewVisibility(R.id.btnGPS, View.GONE);
+			updateViews.setImageViewResource(R.id.parkingImg, R.drawable.icn_camera);
+		}
     			
 		PendingIntent imgClick = PendingIntent.getBroadcast(context, 0, new Intent(Constants.WIDGET_ACTION_IMG_CLICK), PendingIntent.FLAG_UPDATE_CURRENT);
 		updateViews.setOnClickPendingIntent(R.id.parkingImg, imgClick);
