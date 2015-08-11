@@ -38,7 +38,6 @@ public class AppDetail extends FragmentActivity
 	protected void onCreate(Bundle saveInstanceState)
 	{
 		super.onCreate(saveInstanceState);
-		
 		setContentView(R.layout.app_detail);
 		mPagerAdapter = new PagerAdapter(getSupportFragmentManager());
 		mViewPager.setAdapter(mPagerAdapter);
