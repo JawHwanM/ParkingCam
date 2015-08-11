@@ -1,15 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    
     <!-- Common Start -->
     <string name="app_name">ParkingCam</string>
-    <string name="action_settings">Settings</string>
     <string name="dot">.</string>
     <string name="common_confirm">확인</string>
     <!-- Common End -->
     
+    <!-- Menu Start -->
+    <string name="menu_parking_cam">Parking Cam</string>
+    <string name="menu_camera_capture">Camera Capture</string>
+    <string name="menu_credits">Credits</string>
+    <string name="omenu_settings">Settings</string>
+    <string name="omenu_credits">Credits</string>
+    <string name="widget_parking">Parking Widget</string>
+    <!-- Menu End -->
+    
+    <!-- Team Value Start -->
+    <string name="team_name">Android Team2</string>
+    <string name="product_mgr">Product Manager</string>
+    <string name="choi_hee_tae">Choi Hee Tae</string>
+    <string name="bae_jee_deok">Bae Jee Deok</string>
+    <string name="designer">Designer</string>
+    <string name="won_jae_hwan">Won Jae Hwan</string>
+    <string name="kim_hye_soo">Kim Hye Soo</string>
+    <string name="developer">Developer</string>
+    <string name="shin_jae_hwan">Shin Jae Hwan</string>
+    <string name="park_tae_kyu">Park Tae Kyu</string>
+    <!-- Team Value End -->
+    
     <!-- ParkingCam Start -->
-    <string name="default_text">Text1234</string>
     <string name="parking_take_picture">촬영</string>
     <string name="icon2">ICON_2</string>
     <string name="icon3">ICON_3</string>
@@ -21,7 +41,6 @@
     <!-- ParkingCam End -->
 
 	<!-- CameraCapture Start -->
-	<string name="camera_capture">Camera Capture</string>
 	<string name="auto_capture">Auto Capture</string>
 	<string name="wait_capture">Wait a seconds</string>
 	<string name="photo_no">등록된 사진이 없습니다.</string> 

@@ -25,5 +25,10 @@ public class Constants
 {
 	public static final String LANDSCAPE_SCREEN_ENABLED_KEY		= "landscape_screen_enabled";	/**< 화면 가로/세로 보기 키*/
 	
-	public static final int COUNTDOWN_MAX = 3000;	/**< 사진촬영 지연시간	**/
+	public static final String PHOTO_SAVE_FOLDER = "/DCIM/parkingcam";	/**< 사진저장 폴더	*/
+	public static final int COUNTDOWN_MAX = 3000;						/**< 사진촬영 지연시간	**/
+	
+	public static final String WIDGET_ACTION_IMG_CLICK	= "android.appwidget.action.ACTION_IMG_CLICK";	/**< 위젯 이미지 클릭	*/
+	public static final String WIDGET_ACTION_CLS_CLICK	= "android.appwidget.action.ACTION_CLS_CLICK";	/**< 위젯 닫기 클릭	*/
+	public static final String WIDGET_ACTION_GPS_CLICK	= "android.appwidget.action.ACTION_GPS_CLICK";	/**< 위젯 GPS 클릭	*/
 }

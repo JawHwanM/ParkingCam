@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="fill_parent" android:orientation="vertical" android:padding="1dip" android:background="@color/black">
+	<TextView style="@style/TextView.Title"	android:layout_height="wrap_content"	android:layout_weight="15"	android:text="@string/team_name"/>
+	<TextView style="@style/TextView.Text"	android:layout_height="wrap_content"	android:layout_weight="11"	android:text="@string/product_mgr"/>
+    <TextView style="@style/TextView.Name" 	android:layout_height="wrap_content"	android:layout_weight="8"	android:text="@string/choi_hee_tae"/>
+    <TextView style="@style/TextView.Name" 	android:layout_height="wrap_content"	android:layout_weight="8"	android:text="@string/bae_jee_deok"/>
+    <TextView style="@style/TextView.Text" 	android:layout_height="wrap_content"	android:layout_weight="11"	android:text="@string/designer"/>
+    <TextView style="@style/TextView.Name" 	android:layout_height="wrap_content"	android:layout_weight="8"	android:text="@string/won_jae_hwan"/>
+    <TextView style="@style/TextView.Name" 	android:layout_height="wrap_content"	android:layout_weight="8"	android:text="@string/kim_hye_soo"/>
+	<TextView style="@style/TextView.Text" 	android:layout_height="wrap_content"	android:layout_weight="11"	android:text="@string/developer"/>
+    <TextView style="@style/TextView.Name" 	android:layout_height="wrap_content"	android:layout_weight="8"	android:text="@string/shin_jae_hwan"/>
+    <TextView style="@style/TextView.Name" 	android:layout_height="wrap_content"	android:layout_weight="8"	android:text="@string/park_tae_kyu"/>
+    <TextView android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="4"/>
+</LinearLayout>

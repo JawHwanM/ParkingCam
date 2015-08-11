@@ -17,6 +17,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.parkingcam.ParkingCam;
 import android.parkingcam.R;
+import android.parkingcam.common.Credits;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,7 +44,7 @@ public class BaseTemplate extends Activity
 		mCtxContext		= ctxContext;
 		mIntRayoutId	= intRayoutId;
 		
-		setContentView(intRayoutId);
+		setContentView(mIntRayoutId);
 		mSpfPrefer = PreferenceManager.getDefaultSharedPreferences(getContext());
 		setScreenOrientation();
 	}
@@ -109,10 +110,16 @@ public class BaseTemplate extends Activity
     {
     	switch (item.getItemId())
         {
-    		case R.id.action_settings :
-				Intent itClient = new Intent(getApplicationContext(), ParkingCam.class);
-				startActivity(itClient);
-    			break;      		
+        case R.id.omenu_settings :
+			showToastOnThread("Settings");
+			/*Intent itClient = new Intent(getApplicationContext(), ParkingCam.class);
+			startActivity(itClient);*/
+			break; 
+        case R.id.omenu_credits :
+			showToastOnThread("Credits");
+			Intent itClient = new Intent(getApplicationContext(), Credits.class);
+			startActivity(itClient);
+			break;
         }
     	return super.onOptionsItemSelected(item);
     }

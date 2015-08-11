@@ -11,8 +11,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.parkingcam.activity.BaseTemplate;
 import android.parkingcam.camera.CameraCapture;
+import android.view.DragEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnDragListener;
 import android.widget.Button;
 
 /**
@@ -53,6 +55,12 @@ public class ParkingCam extends BaseTemplate
 	public void onStart()
     {
     	super.onStart();
+    	
+    	if(AppContext.getAppFirstLoading() == false)
+    	{
+    		showToastOnThread("First Loading!");
+    		AppContext.setAppFirstLoading(true);
+    	}
 	}
 	
 	/**
@@ -102,6 +110,17 @@ public class ParkingCam extends BaseTemplate
     	});
     	
     	final Button btnIcon2 = (Button)findViewById(R.id.btnIcon2);
+    	btnIcon2.setOnDragListener(new OnDragListener()
+    	{
+			@Override
+			public boolean onDrag(View arg0, DragEvent arg1) 
+			{
+				showToastOnThread("ICON_2 Drag!");
+				return false;
+			}
+    		
+    	});
+    	
     	btnIcon2.setOnClickListener(new OnClickListener()
 		{
 			@Override

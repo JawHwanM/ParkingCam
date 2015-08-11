@@ -17,7 +17,6 @@ import android.hardware.Camera.Parameters;
 import android.os.Handler;
 import android.os.Message;
 import android.parkingcam.R;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 
 /**
@@ -34,15 +33,16 @@ import android.view.SurfaceHolder;
  * 
  * </pre>
  */
+@SuppressWarnings("deprecation")
 public class CameraMgr 
 {
-	private static CameraMgr mStatInstance;	
+	private static CameraMgr mStatInstance;		
 	private static Camera mCmrCamera;						/**< 카메라 */
 	private final Context mCtxContext;				 		/**< 컨텍스트	*/
 	private boolean mBoolPreviewing;						/**< 미리보기 모드 여부 */
 	private Handler mHdrParentMessageHandler;				/**< 부모의 메시지 핸들러 */				
 	private SurfaceHolder mShParentSurfaceHolder = null;	/**< 부모의 surface 홀더 */
-	private boolean mBoolLandOrientation = false;
+	//private boolean mBoolLandOrientation = false;
   
 	Camera.PictureCallback mLsnrPictureListener = new Camera.PictureCallback()
 	{
@@ -109,7 +109,7 @@ public class CameraMgr
 
 	private CameraMgr(Context ctxContext) 
 	{
-		mCtxContext = ctxContext;
+		mCtxContext 		= ctxContext;
 		mCmrCamera			= null;
 		mBoolPreviewing		= false;
 	}
@@ -124,7 +124,7 @@ public class CameraMgr
 	 */
 	public boolean openDriver(boolean boolLandOrientation) 
 	{
-		mBoolLandOrientation = boolLandOrientation;
+		//mBoolLandOrientation = boolLandOrientation;
 		
 		if (mShParentSurfaceHolder == null)
 		{
@@ -150,7 +150,7 @@ public class CameraMgr
 
 	public void openDriver(boolean boolLandOrientation, SurfaceHolder sfHolder) 
 	{
-		mBoolLandOrientation = boolLandOrientation;
+		//mBoolLandOrientation = boolLandOrientation;
 		if(mCmrCamera == null)
 		{
 			try
@@ -242,12 +242,12 @@ public class CameraMgr
 	
 	public static void setDisplayOrientation(Activity activity, boolean boolLandOrientation)
 	{
-		int intRotation = 0;
-		int intDegrees	= 0;
-		int intResult	= 0;
 		try
 		{
-			intRotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+			/*
+			int intDegrees	= 0;
+			int intResult	= 0;
+			int intRotation = activity.getWindowManager().getDefaultDisplay().getRotation();
 			switch (intRotation) 
 			{
 				case Surface.ROTATION_0		: intDegrees = 0; break;
@@ -256,6 +256,7 @@ public class CameraMgr
 				case Surface.ROTATION_270	: intDegrees = 270; break;
 			}
 			intResult  = (90 - intDegrees + 360) % 360;
+			*/
 			if(mCmrCamera != null)
 			{
 				if(boolLandOrientation)
