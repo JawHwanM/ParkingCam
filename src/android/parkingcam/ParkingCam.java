@@ -7,14 +7,24 @@
 
 package android.parkingcam;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Bundle;
 import android.parkingcam.activity.BaseTemplate;
 import android.parkingcam.camera.CameraCapture;
-import android.view.DragEvent;
+import android.parkingcam.common.Constants;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnDragListener;
+import android.view.Window;
 import android.widget.Button;
 
 /**
@@ -32,7 +42,11 @@ import android.widget.Button;
  * </pre>
  */
 public class ParkingCam extends BaseTemplate
-{
+{	
+	private LocationManager 	mClsLocationMgr;			/**< 위치기반 매니져 */
+	private LocationListener 	mClsLocationListener;		/**< 위치기반 리스너 */
+	private boolean mBoolAppFirstLoading = false;
+	
 	/**
 	 * Activity 생성 이벤트
 	 * @param savedInstanceState 상태정보
@@ -41,11 +55,11 @@ public class ParkingCam extends BaseTemplate
     public void onCreate(Bundle savedInstanceState)
     {
     	super.onCreate(savedInstanceState);
-        //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);        
         super.initTemplate(this, R.layout.parking_cam);
         
         initViewControl();
+        initLocationControl();
     }
     
     /**
@@ -56,11 +70,45 @@ public class ParkingCam extends BaseTemplate
     {
     	super.onStart();
     	
-    	if(AppContext.getAppFirstLoading() == false)
+    	mBoolAppFirstLoading = mSpfPrefer.getBoolean(Constants.APP_FIRST_LOADING, true);  	
+    	if(mBoolAppFirstLoading == true)
     	{
     		//TODO:: 사용 설명서 삽입
     		showToastOnThread("First Loading!");
-    		AppContext.setAppFirstLoading(true);
+    		try
+        	{
+        		SharedPreferences.Editor edit = mSpfPrefer.edit();
+    	    	edit.putBoolean(Constants.APP_FIRST_LOADING,  false);
+    	    	edit.commit();
+        	}
+        	catch(Exception ex)
+        	{
+        		ex.printStackTrace();
+        	}
+    	}
+    	else
+    	{
+			boolean stateOfGPS = mClsLocationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    		if(stateOfGPS)
+    		{
+    			Intent itCameraCapture = new Intent(getContext(), CameraCapture.class);
+    			startActivityForResult(itCameraCapture, 0);
+    		}
+    		else
+    		{
+    			AlertDialog.Builder alert = new AlertDialog.Builder(ParkingCam.this);
+		    	alert.setTitle("GPS 경고");
+				alert.setMessage("GPS가 꺼져있습니다. 활성화 시켜주세요.");
+				alert.setPositiveButton("확인",  new DialogInterface.OnClickListener()
+				{
+					@Override
+					public void onClick(DialogInterface dialog, int which) 
+					{
+						finish();
+					}
+				});
+				alert.show();
+    		}
     	}
 	}
 	
@@ -70,6 +118,7 @@ public class ParkingCam extends BaseTemplate
 	@Override
 	public void onStop()
 	{
+		mClsLocationMgr.removeUpdates(mClsLocationListener);
 		super.onStop();
 	}
 	
@@ -79,20 +128,20 @@ public class ParkingCam extends BaseTemplate
     @Override
 	public void onResume()
     {
-    	super.onResume();
-    	
+    	super.onResume();    	
     	setScreenOrientation();
     }
-
+    
     /**
-     * Activity 소멸 이벤트
-     */        
-	@Override
-	public void onDestroy()
-    {	
-	   	super.releaseTemplate();
-	   	super.onDestroy();
-    }
+	 * Activity 소멸 이벤트
+	 */
+	@Override  
+	public void onDestroy() 
+	{		
+		mClsLocationMgr = null;
+		mClsLocationListener = null;
+		super.onDestroy();
+	}
     
 	/**
 	 * View관련 컨트롤을 초기화한다.
@@ -109,86 +158,80 @@ public class ParkingCam extends BaseTemplate
 				startActivityForResult(itCameraCapture, 0);
 			}		
     	});
-    	
-    	final Button btnIcon2 = (Button)findViewById(R.id.btnIcon2);
-    	btnIcon2.setOnDragListener(new OnDragListener()
+    }
+    
+    /**
+     * 위치관련 컨트롤을 초기화한다.
+     */
+    private void initLocationControl()
+    {
+    	mClsLocationMgr = (LocationManager)getSystemService(Context.LOCATION_SERVICE);    	
+    	mClsLocationListener = new LocationListener()
     	{
-			@Override
-			public boolean onDrag(View arg0, DragEvent arg1) 
+    		/**
+    		 * 위치 변경 이벤트
+    		 */
+    		@Override
+			public void onLocationChanged(Location location) 
 			{
-				showToastOnThread("ICON_2 Drag!");
-				return false;
+				AppContext.setLatitude(location.getLatitude());
+				AppContext.setLongitude(location.getLongitude());
+				mClsLocationMgr.removeUpdates(mClsLocationListener);
 			}
     		
-    	});
-    	
-    	btnIcon2.setOnClickListener(new OnClickListener()
-		{
+    		/**
+    		 * 상태 변경 이벤트
+    		 */
+    		@Override
+			public void onStatusChanged(String provider, int status, Bundle bundleExtras) 
+    		{  
+    			switch (status) 
+    			{
+                case LocationProvider.OUT_OF_SERVICE:
+                    // Provider Out of Service
+                    break;
+                case LocationProvider.TEMPORARILY_UNAVAILABLE:
+                    // Provider Temporarily Unavailable
+                    break;
+                case LocationProvider.AVAILABLE:
+                    // Provider Available
+                    break;
+                }
+    		}
+    		
+    		@Override
+			public void onProviderEnabled(String strData) {   }
+			
 			@Override
-			public void onClick(View v) 
-			{
-				showToastOnThread("ICON_2 Click!");
-			}		
-    	});
+			public void onProviderDisabled(String strData) {  }
+    	};
     	
-    	final Button btnIcon3 = (Button)findViewById(R.id.btnIcon3);
-    	btnIcon3.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v) 
-			{
-				showToastOnThread("ICON_3 Click!");
-			}		
-    	});
-    	
-    	final Button btnIcon4 = (Button)findViewById(R.id.btnIcon4);
-    	btnIcon4.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v) 
-			{
-				showToastOnThread("ICON_4 Click!");
-			}		
-    	});
-    	
-    	final Button btnIcon5 = (Button)findViewById(R.id.btnIcon5);
-    	btnIcon5.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v) 
-			{
-				showToastOnThread("ICON_5 Click!");
-			}		
-    	});
-    	
-    	final Button btnIcon6 = (Button)findViewById(R.id.btnIcon6);
-    	btnIcon6.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v) 
-			{
-				showToastOnThread("ICON_6 Click!");
-			}		
-    	});
-    	
-    	final Button btnIcon7 = (Button)findViewById(R.id.btnIcon7);
-    	btnIcon7.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v) 
-			{
-				showToastOnThread("ICON_7 Click!");
-			}		
-    	});
-    	
-    	final Button btnIcon8 = (Button)findViewById(R.id.btnIcon8);
-    	btnIcon8.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v) 
-			{
-				showToastOnThread("ICON_8 Click!");
-			}		
-    	});
+    	if(mClsLocationMgr != null)
+    	{
+    		String locProv = mClsLocationMgr.getBestProvider(getCriteria(), true);
+            mClsLocationMgr.requestLocationUpdates(locProv, 1000, 1, mClsLocationListener);
+    	}
     }
+    
+    public static Criteria getCriteria() 
+    {
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setAltitudeRequired(true);
+        criteria.setBearingRequired(true);		// 방향
+        criteria.setSpeedRequired(true);		// 속도
+        criteria.setCostAllowed(true);
+        criteria.setPowerRequirement(Criteria.POWER_HIGH);
+        return criteria;
+    }
+    
+    /**
+	 * 시스템 설정값이 변경되면 발생하는 이벤트
+	 * @param conNewConfig 설정객체 
+	 */	
+	@Override
+	public void onConfigurationChanged(Configuration conNewConfig)
+	{
+		super.onConfigurationChanged(conNewConfig);
+	}
 }

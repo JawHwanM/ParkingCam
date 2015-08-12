@@ -15,7 +15,8 @@ import android.app.Application;
  */
 public class AppContext extends Application
 {
-	private static boolean mBoolAppFirstLoading = false;	/**< 앱 처음 실행 여부	*/
+	private static double mDblLatitude = 0;
+	private static double mDblLongitude = 0;
 	
 	/**
      *  생성 이벤트
@@ -26,13 +27,9 @@ public class AppContext extends Application
 		super.onCreate();
 	}
 	
-	public static void setAppFirstLoading(boolean boolAppFirstLoading)
-	{
-		mBoolAppFirstLoading = boolAppFirstLoading;
-	}
+	public static void setLatitude(double dblLatitude) { mDblLatitude = dblLatitude; }
+	public static void setLongitude(double dblLongitude) { mDblLongitude = dblLongitude; }
 	
-	public static boolean getAppFirstLoading()
-	{
-		return mBoolAppFirstLoading;
-	}
+	public static double getLatitude() { return mDblLatitude; }
+	public static double getLongitude() { return mDblLongitude; }
 }

@@ -33,8 +33,7 @@ import android.view.SurfaceHolder;
  * 
  * </pre>
  */
-@SuppressWarnings("deprecation")
-public class CameraMgr 
+public class CameraMgr
 {
 	private static CameraMgr mStatInstance;		
 	private static Camera mCmrCamera;						/**< 카메라 */

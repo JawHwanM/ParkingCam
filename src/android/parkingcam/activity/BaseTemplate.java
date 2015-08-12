@@ -15,7 +15,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.parkingcam.ParkingCam;
 import android.parkingcam.R;
 import android.parkingcam.common.Credits;
 import android.preference.PreferenceManager;
@@ -72,20 +71,13 @@ public class BaseTemplate extends Activity
 	public SharedPreferences getPreferences()
 	{
 		return mSpfPrefer;
-	}	
-	
+	}		
 	
 	/**
 	 * 화면 가로/세로보기 설정
 	 */	
 	public void setScreenOrientation()
 	{
-     	// 가로보기
-	    /*if(mSpfPrefer.getBoolean(Constants.LANDSCAPE_SCREEN_ENABLED_KEY, true) == true)
-	    	this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-	    else
-	    	this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);*/
-	    
 	    this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 	}
 	
@@ -108,19 +100,19 @@ public class BaseTemplate extends Activity
     @Override
 	public boolean onOptionsItemSelected(MenuItem item)
     {
-    	switch (item.getItemId())
-        {
-        case R.id.omenu_settings :
-			showToastOnThread("Settings");
+    	int intItemId = item.getItemId();
+    	if(intItemId == R.id.omenu_settings)
+    	{
+    		showToastOnThread("Settings");
 			/*Intent itClient = new Intent(getApplicationContext(), ParkingCam.class);
 			startActivity(itClient);*/
-			break; 
-        case R.id.omenu_credits :
-			showToastOnThread("Credits");
+    	}
+    	else if(intItemId == R.id.omenu_credits)
+    	{
+    		showToastOnThread("Credits");
 			Intent itClient = new Intent(getApplicationContext(), Credits.class);
 			startActivity(itClient);
-			break;
-        }
+    	}
     	return super.onOptionsItemSelected(item);
     }
     

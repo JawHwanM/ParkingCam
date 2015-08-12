@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -35,6 +36,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
+import android.parkingcam.AppContext;
 import android.parkingcam.R;
 import android.parkingcam.activity.BaseTemplate;
 import android.parkingcam.common.CameraButton;
@@ -69,6 +71,9 @@ import android.widget.Toast;
  */
 public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callback
 {
+	private long mLnBackKeyPressedTime = 0;
+    private Toast mToast;
+	
 	private String mStrMessage					= "";		/**< Progress Message	*/
 	private String mStrCurDate 					= "";		/**< 현재 날짜/시각 */
     private String mStrSavePath;   							/**< 저장 경로 	*/
@@ -194,9 +199,10 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	@Override  
 	public void onDestroy() 
 	{		
-		mByteImgData = null;
-		mBtnCamera = null;
-		mLlCameraNextMenu = null;
+		mToast 				= null;
+		mByteImgData 		= null;
+		mBtnCamera 			= null;
+		mLlCameraNextMenu 	= null;
 		
 		if(mProgressDialog != null)
 		{
@@ -209,6 +215,29 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		stopCamera();
 		super.onDestroy();
 	}
+	
+	@Override
+    public void onBackPressed()
+    {
+        if (System.currentTimeMillis() > mLnBackKeyPressedTime + 2000)
+        {
+        	mLnBackKeyPressedTime = System.currentTimeMillis();
+            showGuide();
+            return;
+        }
+        if (System.currentTimeMillis() <= mLnBackKeyPressedTime + 2000)
+        {
+        	moveTaskToBack(true);
+        	finish();
+            mToast.cancel();
+        }
+    }
+
+    public void showGuide()
+    {
+    	mToast = Toast.makeText(getBaseContext(), "\'뒤로\'버튼을 한번 더 누르시면 종료됩니다.", Toast.LENGTH_SHORT);
+    	mToast.show();
+    }
 	
 	/**
 	 * View관련 컨트롤을 초기화한다.
@@ -238,6 +267,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			@Override
 			public void onClick(View v)
 			{
+				moveTaskToBack(true);
 				finish();
 			}
 		});
@@ -275,11 +305,12 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			@Override
 			public void onClick(View v)
 			{
-				doSaveImage();
+				if(doSaveImage())
+				{
+					//doSaveData();
+				}
 			}
 		});
-		
-		
 		
 		mClsCaptureLayout = (CaptureLayout)findViewById(R.id.clCaptureLayoutView);
 		if(mClsCaptureLayout != null) 
@@ -586,21 +617,19 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	 */
 	private void handleMessage(Message msgData) 
 	{
-		switch(msgData.what)
+		int intMsgWhat = msgData.what;
+		if(intMsgWhat == R.id.PHOTO_RESTART_CAPTURE_MODE)
 		{
-		case R.id.PHOTO_RESTART_CAPTURE_MODE:
-			break;
-
-			// ---------------------------------------------------------------
-		case R.id.PHOTO_CAMERA_START :
+			
+		}
+		else if(intMsgWhat == R.id.PHOTO_CAMERA_START)
+		{
 			initCamera();
 			if (mBoolSdCardMounted == false)
 				checkStorageState(true);
-			break;
-
-			// ---------------------------------------------------------------
-		case R.id.PHOTO_CAMERA_MGR_REQUST_PICTURE :	// JPG로 파일출력
-			
+		}
+		else if(intMsgWhat == R.id.PHOTO_CAMERA_MGR_REQUST_PICTURE)
+		{
 			try
 			{
 				//compareTime("이미지 데이터 저장 시작");
@@ -626,41 +655,36 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			{
 				msgData.obj = null;
 			}
-			
-			break;
-			// ---------------------------------------------------------------	
-		case R.id.PHOTO_UPLOAD_FINISHED :	// 전송완료
-			
+		}
+		else if(intMsgWhat == R.id.PHOTO_UPLOAD_FINISHED)
+		{
 			startCameraCapture();
-			break;
-
-		case R.id.PHOTO_CAMERA_MGR_FOCUS_SUCCEDED :
-
-			// 자동 포커스 성공시
-			if (mBoolFocusButtonPressed == false) return;				
+		}
+		else if(intMsgWhat == R.id.PHOTO_CAMERA_MGR_FOCUS_SUCCEDED)
+		{
+			if(mBoolFocusButtonPressed == false) return;				
 			mClsCaptureLayout.drawFocused(true, true);
 			
 			playSoundOnFocus();
 			vibrate();
-			if (mBoolScreenRequestPicture)
+			if(mBoolScreenRequestPicture)
 			{
 				requestCameraTakePicture();
 			}
 			mBoolScreenRequestPicture = false;
-			break;
-
-			// ---------------------------------------------------------------
-		case R.id.PHOTO_CAMERA_MGR_FOCUS_FAILED :
+		}
+		else if(intMsgWhat == R.id.PHOTO_CAMERA_MGR_FOCUS_FAILED)
+		{
+			if(mBoolFocusButtonPressed == false) return;				
+			mClsCaptureLayout.drawFocused(true, true);
 			
-			if (mBoolFocusButtonPressed == false) return;				
-			mClsCaptureLayout.drawFocused(true, false);
-			
+			playSoundOnFocus();
 			vibrate();
+			if(mBoolScreenRequestPicture)
+			{
+				requestCameraTakePicture();
+			}
 			mBoolScreenRequestPicture = false;
-			break;		
-
-		default:
-			break;
 		}
 	}
 
@@ -670,7 +694,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		public void onReceive(Context context, Intent intent) 
 		{
 			String strAction = intent.getAction();
-			if (strAction.equals(Intent.ACTION_MEDIA_MOUNTED)) 
+			if(strAction.equals(Intent.ACTION_MEDIA_MOUNTED)) 
 			{
 				// SD 카드를 쓸수 있음
 				mBoolSdCardMounted = true;
@@ -683,14 +707,14 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			} 
 			else
 			{
-				if (strAction.equals(Intent.ACTION_MEDIA_SCANNER_STARTED)) 
+				if(strAction.equals(Intent.ACTION_MEDIA_SCANNER_STARTED)) 
 				{
 					checkStorageState(false);
 					showToastOnThread(getString(R.string.photo_sd_card_wait));
 				} 
 				else
 				{
-					if (strAction.equals(Intent.ACTION_MEDIA_SCANNER_FINISHED)) 
+					if(strAction.equals(Intent.ACTION_MEDIA_SCANNER_FINISHED)) 
 					{
 						checkStorageState(false);
 					}
@@ -747,8 +771,8 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	/**
 	 * 이미지 저장을 한다
 	 */
-	public void doSaveImage()
-	{
+	public boolean doSaveImage()
+	{		
 		//compareTime("이미지 저장 시작");
 		FileOutputStream fosImage = null;
 		try
@@ -763,18 +787,55 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			// 사진 임시 저장 
 	        mByteImgData = byteArrayToBitmap(mByteImgData);
 			fosImage = new FileOutputStream(mStrSavePath + File.separator + mStrCurDate+".png");
-			fosImage.write(mByteImgData, 0, mByteImgData.length);
-			
+			fosImage.write(mByteImgData, 0, mByteImgData.length);			
 			fosImage.close();
-			//compareTime("이미지 저장 끝");
 			
 			AppWidgetManager appWidgetMgr = AppWidgetManager.getInstance(this);
 			Intent itUpdate = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
 			itUpdate.setClass(this, ParkingWidgetProvider.class);
 			itUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetMgr.getAppWidgetIds(new ComponentName(this, ParkingWidgetProvider.class)));
 			this.sendBroadcast(itUpdate);
-			
 			showToastOnThread("Image Save Success");
+			//compareTime("이미지 저장 끝");
+		}
+		catch (Exception e) 
+		{
+			mBoolTakePhotoProgress = false;
+			mClsCaptureLayout.setMessage("");
+			mHdrMessageHandler.sendEmptyMessage(R.id.PHOTO_RESTART_CAPTURE_MODE);
+			return false;
+		}
+		finally
+		{
+			fosImage = null;
+			mByteImgData = null;
+			moveTaskToBack(true);
+			finish();
+		}
+		return true;
+	}
+	
+	/**
+	 * 사진 정보 저장을 한다
+	 */
+	public void doSaveData()
+	{
+		//compareTime("사진정보 저장 시작");
+		
+		try
+		{
+			//TODO :: DB Insert 필요
+			System.out.println("날짜="+mStrCurDate);
+			System.out.println("X좌표="+AppContext.getLongitude());
+			System.out.println("Y좌표="+AppContext.getLatitude());
+			
+			AppWidgetManager appWidgetMgr = AppWidgetManager.getInstance(this);
+			Intent itUpdate = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+			itUpdate.setClass(this, ParkingWidgetProvider.class);
+			itUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetMgr.getAppWidgetIds(new ComponentName(this, ParkingWidgetProvider.class)));
+			this.sendBroadcast(itUpdate);
+			showToastOnThread("Data Save Success");
+			//compareTime("사진정보 저장 끝");
 		}
 		catch (Exception e) 
 		{
@@ -784,9 +845,8 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		}
 		finally
 		{
-			fosImage = null;
-			mByteImgData = null;
 			mStrCurDate = "";
+			moveTaskToBack(true);
 			finish();
 		}
 	}
@@ -834,4 +894,14 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		long lngCurTime = now.getTimeInMillis();
 		mLngCurTime = lngCurTime;
 	}*/
+	
+	/**
+	 * 시스템 설정값이 변경되면 발생하는 이벤트
+	 * @param conNewConfig 설정객체 
+	 */	
+	@Override
+	public void onConfigurationChanged(Configuration conNewConfig)
+	{
+		super.onConfigurationChanged(conNewConfig);
+	}
 }

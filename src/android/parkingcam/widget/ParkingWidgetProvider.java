@@ -16,7 +16,10 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.os.Environment;
 import android.parkingcam.R;
 import android.parkingcam.common.Constants;
@@ -40,8 +43,13 @@ import android.widget.Toast;
  */
 public class ParkingWidgetProvider extends AppWidgetProvider
 {		
-	private static String mStrImage = "";		/**< 위젯 이미지파일 경로	*/
+	private static String mStrExt 			= "";
+	private static String mStrBaseFolder 	= "";
 	
+	private static String mStrImage = "";						/**< 위젯 이미지파일 경로	*/
+	private static String mStrImageName = "";					/**< 위젯 이미지파일 이름	*/
+	private static int mIntWidth  = Constants.WIDGET_WIDTH;		/**< 위젯 크기(너비)	*/
+	private static int mIntHeight = Constants.WIDGET_HEIGHT;	/**< 위젯 크기(높이)	*/
 	/**
 	 * 브로드캐스트 리시버 이벤트
 	 */
@@ -60,22 +68,23 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 		
 		if(Constants.WIDGET_ACTION_CLS_CLICK.equals(action))
 		{
-			//TODO:: 닫기 이벤트
-			if("".equals(mStrImage) == false)
+			//TODO:: DB 삭제 이벤트 - mStrImageName(PK)
+			if("".equals(mStrImage) == false && "".equals(mStrImageName) == false)
 			{
 				File deleteFile = new File(mStrImage);
 				if(deleteFile.exists())
 				{
 					deleteFile.delete();
 					mStrImage = "";
+					mStrImageName = "";
 					AppWidgetManager appWidgetMgr = AppWidgetManager.getInstance(context);
 					this.onUpdate(context, appWidgetMgr, appWidgetMgr.getAppWidgetIds(new ComponentName(context, getClass())));
+					Toast.makeText(context, "Delete Image!", Toast.LENGTH_SHORT).show();
 				}
-				Toast.makeText(context, "Delete Image!", Toast.LENGTH_SHORT).show();
-			}
-			else
-			{
-				Toast.makeText(context, "Have no Image!", Toast.LENGTH_SHORT).show();
+				else
+				{
+					Toast.makeText(context, "Have no Image!", Toast.LENGTH_SHORT).show();
+				}
 			}
 		}
 		
@@ -111,6 +120,8 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 	public void onEnabled(Context context)
 	{
 		System.out.println("*onEnabled()");
+		mStrExt 		= Environment.getExternalStorageState();
+		mStrBaseFolder 	= Environment.getExternalStorageDirectory().getAbsolutePath() + Constants.PHOTO_SAVE_FOLDER;
 		super.onEnabled(context);
 	}
 	
@@ -136,6 +147,18 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 	}
 	
 	/**
+	 * 위젯의 상태가 변경될 때 호출되는 이벤트
+	 */
+	public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetMgr, int appWidgetId, Bundle newOptions)
+	{
+		int intWidgetMaxWidth = appWidgetMgr.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH);
+		int intWidgetMaxHeight = appWidgetMgr.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
+		mIntWidth = intWidgetMaxWidth;
+		mIntHeight = intWidgetMaxHeight;
+		this.onUpdate(context, appWidgetMgr, appWidgetMgr.getAppWidgetIds(new ComponentName(context, getClass())));
+	}
+	
+	/**
 	 * 개별ID 별로 갱신처리를 한다.
 	 * @param context
 	 * @param appWidgetMgr
@@ -144,14 +167,28 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 	public static void updateAppWidget(Context context, AppWidgetManager appWidgetMgr, int appWidgetId)
 	{
 		System.out.println("*updateAppWidget()");
-		RemoteViews updateViews = new RemoteViews(context.getPackageName(), R.layout.parking_widget);		
+		RemoteViews updateViews = new RemoteViews(context.getPackageName(), R.layout.parking_widget);
 		
-		mStrImage = setImage();
+		mStrImage = getLastImagePath();
 		if("".equals(mStrImage) == false)
 		{
+			Bitmap bitmap = BitmapFactory.decodeFile(mStrImage);
+			bitmap = doResizeBitmap(mIntWidth, mIntHeight);
 			updateViews.setViewVisibility(R.id.btnClose, View.VISIBLE);
 			updateViews.setViewVisibility(R.id.btnGPS, View.VISIBLE);
-			updateViews.setImageViewBitmap(R.id.parkingImg, BitmapFactory.decodeFile(mStrImage));
+			updateViews.setImageViewBitmap(R.id.parkingImg, bitmap);
+			/*if(doCheckBitmapFitsInMemory(bitmap.getWidth(), bitmap.getHeight(), bitmap.getDensity()))
+			{
+				updateViews.setViewVisibility(R.id.btnClose, View.VISIBLE);
+				updateViews.setViewVisibility(R.id.btnGPS, View.VISIBLE);
+				updateViews.setImageViewBitmap(R.id.parkingImg, bitmap);
+			}
+			else
+			{
+				updateViews.setViewVisibility(R.id.btnClose, View.GONE);
+				updateViews.setViewVisibility(R.id.btnGPS, View.GONE);
+				updateViews.setImageViewResource(R.id.parkingImg, R.drawable.icn_camera);
+			}*/
 		}
 		else
 		{
@@ -169,25 +206,22 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 		PendingIntent gpsClick = PendingIntent.getBroadcast(context, 0, new Intent(Constants.WIDGET_ACTION_GPS_CLICK), PendingIntent.FLAG_UPDATE_CURRENT);
 		updateViews.setOnClickPendingIntent(R.id.btnGPS, gpsClick);
 		
-		//this.onUpdate(context, appWidgetMgr, appWidgetMgr.getAppWidgetIds(new ComponentName(context, getClass())));
-		
     	appWidgetMgr.updateAppWidget(appWidgetId, updateViews);
+    	//appWidgetMgr.partiallyUpdateAppWidget(appWidgetId, updateViews);
 	}
 	
 	/**
 	 * 가장 최신 이미지 파일 경로를 찾아준다
 	 */
-	public static String setImage()
+	public static String getLastImagePath()
 	{
-		System.out.println("*setImage()");
+		System.out.println("*getLastImagePath()");
 		String strFileData = "";
 		
-		// 다운로드 경로를 외장메모리 사용자 지정 폴더로 함.  
-        String ext = Environment.getExternalStorageState();
-        if(ext.equals(Environment.MEDIA_MOUNTED)) 
+		// 다운로드 경로를 외장메모리 사용자 지정 폴더로 함.        
+        if(mStrExt.equals(Environment.MEDIA_MOUNTED)) 
         {
-        	String strBaseFolder = Environment.getExternalStorageDirectory().getAbsolutePath() + Constants.PHOTO_SAVE_FOLDER;
-            File dir = new File(strBaseFolder);
+            File dir = new File(mStrBaseFolder);
             if(dir.isDirectory() == false)
             {
             	dir.mkdirs();
@@ -203,6 +237,7 @@ public class ParkingWidgetProvider extends AppWidgetProvider
             		for(int intIndex = 0; intIndex < lstFile.length; intIndex++)
                 	{
                 		String fileName = lstFile[intIndex].getName();
+                		mStrImageName = fileName;
                 		fileName = fileName.substring(fileName.lastIndexOf(".")+1,fileName.length());
                 		// Image 파일 확장자 확인
                 		if(fileName.toLowerCase(Locale.getDefault()).equals("png") 
@@ -219,10 +254,64 @@ public class ParkingWidgetProvider extends AppWidgetProvider
                 	}
             		
             		// 파일 경로 저장
-            		strFileData = strBaseFolder + File.separator + lstFile[intDestIndex].getName();
+            		strFileData = mStrBaseFolder + File.separator + lstFile[intDestIndex].getName();
             	}
             }
         }
         return strFileData;
 	}
+	
+	/**
+	 * 비트맵(이미지) 사이즈 재조정
+	 * @param width	너비
+	 * @param height 높이
+	 * @return 비트맵 이미지
+	 */
+	public static Bitmap doResizeBitmap(int width, int height)
+	{
+		System.out.println("*doResizeBitmap()");
+		BitmapFactory.Options options = new BitmapFactory.Options();
+    	options.inPreferredConfig = Config.RGB_565;
+		options.inJustDecodeBounds = true;
+    	
+    	BitmapFactory.decodeFile(mStrImage, options);    	
+    	if(options.outWidth <= 0 || options.outHeight <= 0) return null;
+    	
+		float flWidth 	= options.outWidth/width;
+		float flHeight 	= options.outHeight/height;
+		float scale = flWidth > flHeight ? flWidth : flHeight;
+		
+		if(scale >= 8) options.inSampleSize = 8;
+		else if(scale >= 6) options.inSampleSize = 6;
+		else if(scale >= 4) options.inSampleSize = 4;
+		else if(scale >= 2) options.inSampleSize = 2;
+		else options.inSampleSize = 1;
+		
+		options.inJustDecodeBounds = false;		
+		return BitmapFactory.decodeFile(mStrImage, options);
+	}
+	
+	/**
+	 * 메모리에 맞는 비트맵(이미지) 체크
+	 * @param bmpwidth 너비
+	 * @param bmpheight 높이
+	 * @param bmpdensity 
+	 * @return 결과
+	 */
+	/*public static boolean doCheckBitmapFitsInMemory(long width,long height, int density )
+	{
+		System.out.println("*doCheckBitmapFitsInMemory()");
+		long reqsize = width*height*density;
+	    long allocNativeHeap = Debug.getNativeHeapAllocatedSize();
+	    final long heapPad = (long)Math.max(4*1024*1024,Runtime.getRuntime().maxMemory()*0.1);
+	    long lnReqSum = reqsize + allocNativeHeap + heapPad;
+	    long lnMaxMemory = Runtime.getRuntime().maxMemory();
+	    System.out.println("lnReqSum = "+lnReqSum);
+	    System.out.println("lnMaxMemory = "+lnMaxMemory);
+	    if(lnReqSum >= lnMaxMemory)
+	    {
+	        return false;
+	    }	    
+	    return true;
+	}*/
 }

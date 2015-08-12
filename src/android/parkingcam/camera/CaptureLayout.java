@@ -118,10 +118,10 @@ public final class CaptureLayout extends View
 			cvsCanvas.drawRect(mRectBox, mPntBox);
 		
 	
-			if (mBoolFocusImageDisplay)
+			if(mBoolFocusImageDisplay)
 			{
 				Bitmap bm;
-				if (mBoolFocusImageOrientation)
+				if(mBoolFocusImageOrientation)
 				{
 					// 가로
 					bm = BitmapFactory.decodeResource(mCtxContext.getResources(), R.drawable.icn_landscape);
@@ -135,7 +135,7 @@ public final class CaptureLayout extends View
 				}
 			}
 			
-			if (mBoolDrawFocused)
+			if(mBoolDrawFocused)
 			{
 				if (mBoolFocus)
 					mPntFocus.setColor(Color.GREEN);
@@ -146,11 +146,10 @@ public final class CaptureLayout extends View
 				pntBlack.setColor(Color.BLACK);
 				cvsCanvas.drawCircle(rectFrame.left+50, rectFrame.bottom - 50, 11, pntBlack);
 				cvsCanvas.drawCircle(rectFrame.left+50, rectFrame.bottom - 50, 10, mPntFocus);
-				
 			}
 			
 			// 상단 메시지 
-			if (mStrMessage.length() > 0)
+			if(mStrMessage.length() > 0)
 			{
 				Paint pntText = new Paint();
 				pntText.setColor(Color.GREEN);
@@ -160,7 +159,7 @@ public final class CaptureLayout extends View
 				cvsCanvas.drawText(mStrMessage, rectFrame.left+60, rectFrame.top + 30, pntText);
 			}
 		} 
-		catch (Exception ex)
+		catch(Exception ex)
 		{
 			ex.printStackTrace();
 		}
