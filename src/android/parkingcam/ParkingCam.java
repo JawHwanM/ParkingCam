@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.parkingcam.activity.BaseTemplate;
 import android.parkingcam.camera.CameraCapture;
 import android.parkingcam.common.Constants;
+import android.parkingcam.manual.MainManual;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -91,8 +92,11 @@ public class ParkingCam extends BaseTemplate
 			boolean stateOfGPS = mClsLocationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER);
     		if(stateOfGPS)
     		{
-    			Intent itCameraCapture = new Intent(getContext(), CameraCapture.class);
-    			startActivityForResult(itCameraCapture, 0);
+    			Intent itMainManual = new Intent(getContext(), MainManual.class);
+    			startActivityForResult(itMainManual, 0);
+    			
+    			/*Intent itCameraCapture = new Intent(getContext(), CameraCapture.class);
+    			startActivityForResult(itCameraCapture, 0);*/
     		}
     		else
     		{

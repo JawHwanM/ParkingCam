@@ -305,9 +305,16 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			@Override
 			public void onClick(View v)
 			{
-				if(doSaveImage())
+				if(AppContext.getLatitude() > 0 && AppContext.getLongitude() > 0)
 				{
-					//doSaveData();
+					if(doSaveImage())
+					{
+						//doSaveData();
+					}
+				}
+				else
+				{
+					showToastOnThread("Location Data Gathering...\nWait a Second...");
 				}
 			}
 		});
@@ -316,7 +323,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		if(mClsCaptureLayout != null) 
 		{
 			mClsCaptureLayout.setBackgroundColor(Color.TRANSPARENT);
-			mClsCaptureLayout.setOnDragListener(new OnDragListener()
+			/*mClsCaptureLayout.setOnDragListener(new OnDragListener()
 			{
 				@Override
 				public boolean onDrag(View v, DragEvent event) 
@@ -324,7 +331,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 					return false;
 				}
 				
-			});
+			});*/
 		}
 		
 		mStrMessage = getString(R.string.wait_capture) + getString(R.string.dot);
