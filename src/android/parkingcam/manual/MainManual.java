@@ -2,21 +2,19 @@
 	@file	MainManual.java
 	@date	2015/08/10
 	@author	JawHwanM
-	@brief	사용설명서 메인
+	@brief	사용설명서
 */
-
 package android.parkingcam.manual;
 
 import android.os.Bundle;
 import android.parkingcam.R;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.ViewPager;
+import android.parkingcam.activity.BaseTemplate;
+import android.view.View;
+import android.view.Window;
+import android.widget.Toast;
 
 /**
- * 사용설명서 메인
+ * 사용설명서
  * @author JawHwanM
  * @since 2015.08.10
  * @version 1.0
@@ -29,21 +27,25 @@ import android.support.v4.view.ViewPager;
  * 
  * </pre>
  */
-public class MainManual extends FragmentActivity
+public class MainManual extends BaseTemplate
 {
-	private ViewPager mViewPager;
-	private PagerAdapter mPagerAdapter;
+	private long mLnBackKeyPressedTime = 0;
+    private Toast mToast;
 	
-	@Override
-	protected void onCreate(Bundle saveInstanceState)
-	{
-		super.onCreate(saveInstanceState);
-		setContentView(R.layout.main_manual);
-		mPagerAdapter = new PagerAdapter(getSupportFragmentManager());
-		
-		initViewControl();
-	}
-	
+	/**
+	 * Activity 생성 이벤트
+	 * @param savedInstanceState 상태정보
+	 */
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+    	super.onCreate(savedInstanceState);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);        
+        //super.initTemplate(this, R.layout.parking_cam);
+        
+        initViewControl();
+    }
+
 	/**
      * Activity 시작 이벤트
      */    
@@ -51,88 +53,71 @@ public class MainManual extends FragmentActivity
 	public void onStart()
     {
     	super.onStart();
-    }
-   
-    /**
-     * Activity 중단 이벤트
-     */    
-    @Override
+	}
+	
+	/**
+	 * Activity 중단 이벤트
+	 */    
+	@Override
 	public void onStop()
-    {
-    	super.onStop();
-    }
-    
-    /**
+	{
+		super.onStop();
+	}
+	
+	/**
      * Activity 실행/재실행 이벤트
-     */    
+     */	
     @Override
 	public void onResume()
     {
-    	super.onResume();
-    }  
-    
-    /**
-     * Activity 멈춤 이벤트
-     */ 
-    @Override
-	public void onPause() 
-    {
-        super.onPause();
+    	super.onResume();    	
+    	setScreenOrientation();
     }
     
     /**
-     * Activity 소멸 이벤트
-     */        
-    @Override
-	public void onDestroy()
-    {
-    	super.onDestroy();
-    }
-    
-    /**
-     * View관련 컨트롤 초기화
-     */
-    private void initViewControl()
-    {
-    	mViewPager = (ViewPager) findViewById(R.id.vPager);
-    	mViewPager.setAdapter(mPagerAdapter);
-    }
-    
-    
-	/**
-	 * ViewPager 어댑터
-	 * @author JaeHwanM
-	 *
+	 * Activity 소멸 이벤트
 	 */
-	private class PagerAdapter extends FragmentStatePagerAdapter
+	@Override  
+	public void onDestroy() 
 	{
-		/**
-		 * 생성자
-		 * @param fm
-		 */
-		public PagerAdapter(FragmentManager fragmentMgr)
-		{
-			super(fragmentMgr);
-		}
+		super.onDestroy();
+	}
+	
+	@Override
+    public void onBackPressed()
+    {
+        if (System.currentTimeMillis() > mLnBackKeyPressedTime + 2000)
+        {
+        	mLnBackKeyPressedTime = System.currentTimeMillis();
+            showGuide();
+            return;
+        }
+        if (System.currentTimeMillis() <= mLnBackKeyPressedTime + 2000)
+        {
+        	moveTaskToBack(true);
+        	finish();
+            mToast.cancel();
+        }
+    }
 
-		/**
-		 * Fragment 페이지 생성
-		 */
-		@Override
-		public Fragment getItem(int position) 
-		{
-			// TODO Auto-generated method stub
-			return FragManual.create(position);
-		}
-
-		/**
-		 * 페이지 총 개수
-		 */
-		@Override
-		public int getCount() 
-		{
-			// TODO Auto-generated method stub
-			return 5;
-		}
+    public void showGuide()
+    {
+    	mToast = Toast.makeText(getBaseContext(), "\'뒤로\'버튼을 한번 더 누르시면 종료됩니다.", Toast.LENGTH_SHORT);
+    	mToast.show();
+    }
+	
+	/**
+	 * View 관련 컨트롤 초기화한다.
+	 */
+	private void initViewControl() 
+	{
+		ScrollView sView = new ScrollView(this);
+		View view1 = View.inflate(this, R.layout.manual_1, null);
+		View view2 = View.inflate(this, R.layout.manual_2, null);
+		View view3 = View.inflate(this, R.layout.manual_3, null);
+		sView.addView(view1);
+		sView.addView(view2);
+		sView.addView(view3);
+		setContentView(sView);
 	}
 }

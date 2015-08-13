@@ -52,6 +52,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnDragListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -288,7 +289,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		mLlCameraNextMenu.setVisibility(View.GONE);
 		
 		CameraButton btnMap = (CameraButton)findViewById(R.id.btnMap);			
-		btnMap.setImage(R.drawable.compass, 0, 0);
+		btnMap.setImage(R.drawable.icn_leaf, 0, 0);
 		btnMap.setOnClickListener(new OnClickListener()
 		{
 			@Override
@@ -298,8 +299,17 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			}
 		});
 		
-		CameraButton btnSave = (CameraButton)findViewById(R.id.btnSave);			
-		btnSave.setImage(R.drawable.icn_camera_black, 0, 0);
+		Button btnAgain = (Button)findViewById(R.id.btnAgain);		
+		btnAgain.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				showToastOnThread("Again...");
+			}
+		});
+		
+		Button btnSave = (Button)findViewById(R.id.btnSave);
 		btnSave.setOnClickListener(new OnClickListener()
 		{
 			@Override
@@ -307,10 +317,11 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			{
 				if(AppContext.getLatitude() > 0 && AppContext.getLongitude() > 0)
 				{
-					if(doSaveImage())
+					showToastOnThread("Save...");
+					/*if(doSaveImage())
 					{
 						//doSaveData();
-					}
+					}*/
 				}
 				else
 				{

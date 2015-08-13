@@ -55,8 +55,8 @@ public final class CaptureLayout extends View
 		mRectBox = new Rect();
 		Resources resources = getResources();
 		
-		mIntMaskColor	= resources.getColor(R.color.photo_capturelayout_mask);	// 캡춰레이아웃의 마스크색상
-		mIntFrameColor	= resources.getColor(R.color.photo_capturelayout_frame);	// 캡춰레이아웃의 프레임색상
+		mIntMaskColor	= resources.getColor(R.color.transparent);	// 캡춰레이아웃의 마스크색상
+		mIntFrameColor	= resources.getColor(R.color.transparent);	// 캡춰레이아웃의 프레임색상
 	}
 
 	public void drawFocusIcon(boolean boolFocusImageDisplay, boolean boolFocusImageOrientation)

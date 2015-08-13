@@ -20,13 +20,21 @@
 					</TableRow>
 					<TableRow>
 					    <TextView 	android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="20"/>
-					    <Button		android:id="@+id/btnTake"
+					    <!-- <Button		android:id="@+id/btnTake"
 									android:layout_width="0dp"
 									android:layout_height="wrap_content"
 									android:layout_weight="60"
 									android:layout_gravity="center_vertical|center_horizontal"
 									android:gravity="center_vertical|center_horizontal"
-									android:text="@string/parking_take_picture" />
+									android:text="@string/parking_take_picture" /> -->
+					    <TextView 	android:layout_width="0dp" 
+					        		android:layout_height="wrap_content" 
+					        		android:layout_weight="60" 
+					        		android:layout_gravity="center_vertical|center_horizontal"
+									android:gravity="center_vertical|center_horizontal"
+									android:textSize="30sp"
+									android:textColor="@color/white"
+					        		android:text="@string/menu_manual"/>
 					    <TextView 	android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="20"/>
 					</TableRow>
 				</TableLayout>

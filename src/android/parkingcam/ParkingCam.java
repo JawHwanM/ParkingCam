@@ -23,10 +23,7 @@ import android.parkingcam.activity.BaseTemplate;
 import android.parkingcam.camera.CameraCapture;
 import android.parkingcam.common.Constants;
 import android.parkingcam.manual.MainManual;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.Window;
-import android.widget.Button;
 
 /**
  * ParkingCam Main
@@ -71,7 +68,7 @@ public class ParkingCam extends BaseTemplate
     {
     	super.onStart();
     	
-    	mBoolAppFirstLoading = mSpfPrefer.getBoolean(Constants.APP_FIRST_LOADING, true);  	
+    	mBoolAppFirstLoading = mSpfPrefer.getBoolean(Constants.APP_FIRST_LOADING, true);
     	if(mBoolAppFirstLoading == true)
     	{
     		//TODO:: 사용 설명서 삽입
@@ -81,6 +78,9 @@ public class ParkingCam extends BaseTemplate
         		SharedPreferences.Editor edit = mSpfPrefer.edit();
     	    	edit.putBoolean(Constants.APP_FIRST_LOADING,  false);
     	    	edit.commit();
+    	    	
+    	    	/*Intent itMainManual = new Intent(getContext(), MainManual.class);
+    			startActivityForResult(itMainManual, 0);*/
         	}
         	catch(Exception ex)
         	{
@@ -92,11 +92,8 @@ public class ParkingCam extends BaseTemplate
 			boolean stateOfGPS = mClsLocationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER);
     		if(stateOfGPS)
     		{
-    			Intent itMainManual = new Intent(getContext(), MainManual.class);
-    			startActivityForResult(itMainManual, 0);
-    			
-    			/*Intent itCameraCapture = new Intent(getContext(), CameraCapture.class);
-    			startActivityForResult(itCameraCapture, 0);*/
+    			Intent itCameraCapture = new Intent(getContext(), MainManual.class);
+    			startActivityForResult(itCameraCapture, 0);
     		}
     		else
     		{
@@ -152,7 +149,7 @@ public class ParkingCam extends BaseTemplate
 	 */ 
     private void initViewControl()
     {
-    	final Button btnTake = (Button)findViewById(R.id.btnTake);
+    	/*final Button btnTake = (Button)findViewById(R.id.btnTake);
     	btnTake.setOnClickListener(new OnClickListener()
 		{
 			@Override
@@ -161,7 +158,7 @@ public class ParkingCam extends BaseTemplate
 				Intent itCameraCapture = new Intent(v.getContext(), CameraCapture.class);
 				startActivityForResult(itCameraCapture, 0);
 			}		
-    	});
+    	});*/
     }
     
     /**

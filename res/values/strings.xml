@@ -49,6 +49,8 @@
 	<string name="auto_capture">Auto Capture</string>
 	<string name="photo_save">Photo Save</string>
 	<string name="wait_capture">Wait a seconds</string>
+	<string name="camera_again">AGAIN</string>
+	<string name="camera_save">SAVE</string>
 	<string name="photo_no">등록된 사진이 없습니다.</string> 
 	<string name="photo_request_camera_focus">자동 포커스 설정중...</string>
 	<string name="photo_request_camera_take_picture">사진 캡쳐중...</string>

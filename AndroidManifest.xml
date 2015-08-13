@@ -11,7 +11,7 @@
         </activity>
         <activity android:name="android.parkingcam.camera.CameraCapture" 	android:label="@string/menu_camera_capture" android:theme="@android:style/Theme.Translucent" android:configChanges="orientation|keyboardHidden|keyboard|navigation"></activity>
         <activity android:name="android.parkingcam.map.ParkingMap" 			android:label="@string/menu_parking_map" 	android:theme="@android:style/Theme.Translucent" android:configChanges="orientation|keyboardHidden|keyboard|navigation"></activity>
-        <activity android:name="android.parkingcam.manual.MainManual"		android:label="@string/menu_manual" 		android:configChanges="orientation|keyboardHidden|keyboard|navigation"></activity>
+        <activity android:name="android.parkingcam.manual.MainManual" 		android:label="@string/menu_manual" 		android:configChanges="orientation|keyboardHidden|keyboard|navigation"></activity>
         <activity android:name="android.parkingcam.common.Credits" 			android:label="@string/menu_credits" 		android:configChanges="orientation|keyboardHidden|keyboard|navigation"></activity>
         
         <!-- Widget Provider -->

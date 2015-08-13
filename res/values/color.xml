@@ -9,7 +9,10 @@
     <color name="black">#000000</color>
     <color name="red">#FF0000</color>
     <color name="blue">#0000ff</color>    
-    <color name="orange">#ED6200</color>    
+    <color name="khaki">#f0e68c</color>
+    <color name="lightsalmon">#ffa07a</color>
+    <color name="orange">#ED6200</color>
+    <color name="darkorange">#ff8c00 </color>
     <color name="transparent">#00000000</color>
     <color name="silver">#c0c0c0</color>
     <color name="gray">#808080</color>

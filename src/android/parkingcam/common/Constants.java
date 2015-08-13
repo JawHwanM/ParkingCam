@@ -41,4 +41,9 @@ public class Constants
 	public static final String WIDGET_ACTION_GPS_CLICK	= "android.appwidget.action.ACTION_GPS_CLICK";	/**< 위젯 GPS 클릭	*/
 	public static final int WIDGET_WIDTH				= 145;	/**< 위젯 너비 Default	*/
 	public static final int WIDGET_HEIGHT				= 145;	/**< 위젯 높이 Default	*/
+	
+	public static final int MANUAL_LAYOUT_COUNT 	= 3;	/**< 화면수	*/
+	public static final int SNAP_VELOCITY 			= 100;	/**< 화면전환 드래그 속도 최소값 pixel/s	*/
+	public static final int TOUCH_STATE_SCROLLING 	= 0;	/**< 상태 : 현재 스크롤중	*/
+	public static final int TOUCH_STATE_NORMAL 		= 1;	/**< 상태 : 스크롤 멈춤	*/
 }
