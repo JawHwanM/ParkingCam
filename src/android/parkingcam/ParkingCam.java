@@ -79,8 +79,8 @@ public class ParkingCam extends BaseTemplate
     	    	edit.putBoolean(Constants.APP_FIRST_LOADING,  false);
     	    	edit.commit();
     	    	
-    	    	/*Intent itMainManual = new Intent(getContext(), MainManual.class);
-    			startActivityForResult(itMainManual, 0);*/
+    	    	Intent itMainManual = new Intent(getContext(), MainManual.class);
+    			startActivityForResult(itMainManual, 0);
         	}
         	catch(Exception ex)
         	{
@@ -92,7 +92,7 @@ public class ParkingCam extends BaseTemplate
 			boolean stateOfGPS = mClsLocationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER);
     		if(stateOfGPS)
     		{
-    			Intent itCameraCapture = new Intent(getContext(), MainManual.class);
+    			Intent itCameraCapture = new Intent(getContext(), CameraCapture.class);
     			startActivityForResult(itCameraCapture, 0);
     		}
     		else
