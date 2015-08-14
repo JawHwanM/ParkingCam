@@ -3,19 +3,20 @@
     <uses-sdk android:minSdkVersion="16" android:targetSdkVersion="18" />
 
     <application android:allowBackup="true" android:icon="@drawable/icn_main_icon" android:label="@string/app_name" android:theme="@style/AppTheme" android:name=".AppContext">
-        <activity android:name="android.parkingcam.ParkingCam" android:label="@string/menu_parking_cam" android:theme="@android:style/Theme.Translucent">
+        <activity android:name="android.parkingcam.ParkingCam" android:label="@string/menu_parking_cam" android:theme="@android:style/Theme.Translucent.NoTitleBar" android:excludeFromRecents="true" android:taskAffinity="">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="android.parkingcam.camera.CameraCapture" 	android:label="@string/menu_camera_capture" android:theme="@android:style/Theme.Translucent" android:configChanges="orientation|keyboardHidden|keyboard|navigation"/>
-        <activity android:name="android.parkingcam.manual.MainManual" 		android:label="@string/menu_manual" 		android:configChanges="orientation|keyboardHidden|keyboard|navigation"/>
-        <activity android:name="android.parkingcam.map.ParkingMap" 			android:label="@string/menu_parking_map" 	android:theme="@android:style/Theme.Translucent" android:configChanges="orientation|keyboardHidden|keyboard|navigation"/>
-        <activity android:name="android.parkingcam.common.Credits" 			android:label="@string/menu_credits" 		android:configChanges="orientation|keyboardHidden|keyboard|navigation"/>
+        <activity android:name="android.parkingcam.camera.CameraCapture" 	android:label="@string/menu_camera_capture" android:theme="@android:style/Theme.Translucent.NoTitleBar" android:configChanges="orientation|keyboardHidden|keyboard|navigation" android:excludeFromRecents="true"/>
+        <activity android:name="android.parkingcam.manual.MainManual" 		android:label="@string/menu_manual" 		android:theme="@android:style/Theme.Translucent.NoTitleBar" android:configChanges="orientation|keyboardHidden|keyboard|navigation"/>
+        <activity android:name="android.parkingcam.map.ParkingMap" 			android:label="@string/menu_parking_map" 	android:theme="@android:style/Theme.Translucent.NoTitleBar" android:configChanges="orientation|keyboardHidden|keyboard|navigation"/>
+        <activity android:name="android.parkingcam.common.Credits" 			android:label="@string/menu_credits" 		android:theme="@android:style/Theme.Translucent.NoTitleBar" android:configChanges="orientation|keyboardHidden|keyboard|navigation"/>
         
-        <!-- Widget Provider -->
-        <receiver android:name="android.parkingcam.widget.ParkingWidgetProvider" android:label="@string/widget_parking">
+        <!-- Widget -->
+        <activity android:name="android.parkingcam.widget.ParkingWidgetDialog"		android:label="@string/widget_parking" 	android:theme="@android:style/Theme.Translucent.NoTitleBar" android:configChanges="orientation|keyboardHidden|keyboard|navigation" android:excludeFromRecents="true"/>
+        <receiver android:name="android.parkingcam.widget.ParkingWidgetProvider" 	android:label="@string/widget_parking">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
                 <action android:name="android.appwidget.action.ACTION_IMG_CLICK"/>

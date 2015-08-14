@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.parkingcam.R;
 import android.parkingcam.activity.BaseTemplate;
 import android.view.View;
-import android.view.Window;
 import android.widget.Toast;
 
 /**
@@ -39,9 +38,7 @@ public class MainManual extends BaseTemplate
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-    	super.onCreate(savedInstanceState);
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);        
-        //super.initTemplate(this, R.layout.parking_cam);
+    	super.onCreate(savedInstanceState);      
         
         initViewControl();
     }

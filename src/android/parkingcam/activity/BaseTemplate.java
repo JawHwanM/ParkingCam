@@ -214,9 +214,10 @@ public class BaseTemplate extends Activity
         }
         if (System.currentTimeMillis() <= mLnBackKeyPressedTime + 2000)
         {
+        	mToast.cancel();
         	moveTaskToBack(true);
         	finish();
-            mToast.cancel();
+        	android.os.Process.killProcess(android.os.Process.myPid());
         }
     }
 

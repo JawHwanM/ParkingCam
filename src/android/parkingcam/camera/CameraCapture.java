@@ -112,8 +112,6 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
-		// 타이틀 바 출력안함
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
 		super.initTemplate(this, R.layout.camera_capture);
 		
@@ -230,33 +228,18 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	 */ 
 	private void initViewControl()
 	{
-		Window objWindow = getWindow();
-
 		DisplayMetrics displayMetrics = new DisplayMetrics();
 	    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);	    
     	WindowManager.LayoutParams lpParams = getWindow().getAttributes();
-    	lpParams.width =  displayMetrics.widthPixels;	//-40
-    	lpParams.height = displayMetrics.heightPixels- 80;
-    	
+    	lpParams.width =  displayMetrics.widthPixels-20;
+    	lpParams.height = displayMetrics.heightPixels-80;
     	lpParams.screenBrightness = 1;
-    	
+    
+    	Window objWindow = getWindow();
     	objWindow.setAttributes(lpParams);
-		//objWindow.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		
+		objWindow.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		// 현재 보여지고 있는 액티비티 상에서 입력값이 없어도 계속 화면이 꺼지지 않고 유지되도록 한다.
 		objWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		
-		/*CameraButton btnClose = (CameraButton)findViewById(R.id.btnClose);			
-		btnClose.setImage(R.drawable.icn_camera_close, 0, 0);
-		btnClose.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				moveTaskToBack(true);
-				finish();
-			}
-		});*/
 		
 		mBtnCamera = (CameraButton)findViewById(R.id.btnCamera);
 		mBtnCamera.setImage(R.drawable.icn_camera, 0, 0);
@@ -304,10 +287,12 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			{
 				if(AppContext.getLatitude() > 0 && AppContext.getLongitude() > 0)
 				{
-					showToastOnThread("Save...");
 					if(doSaveImage())
 					{
-						doSaveData();
+						if(doSaveData())
+						{
+							showToastOnThread("Save complete!");
+						}
 					}
 				}
 				else
@@ -823,7 +808,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	/**
 	 * 사진 정보 저장을 한다
 	 */
-	public void doSaveData()
+	public boolean doSaveData()
 	{
 		//compareTime("사진정보 저장 시작");
 		
@@ -842,7 +827,6 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			itUpdate.setClass(this, ParkingWidgetProvider.class);
 			itUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetMgr.getAppWidgetIds(new ComponentName(this, ParkingWidgetProvider.class)));
 			this.sendBroadcast(itUpdate);
-			//showToastOnThread("Data Save Success");
 			//compareTime("사진정보 저장 끝");
 		}
 		catch (Exception e) 
@@ -850,6 +834,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			mBoolTakePhotoProgress = false;
 			mClsCaptureLayout.setMessage("");
 			mHdrMessageHandler.sendEmptyMessage(R.id.PHOTO_RESTART_CAPTURE_MODE);
+			return false;
 		}
 		finally
 		{
@@ -857,6 +842,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			moveTaskToBack(true);
 			finish();
 		}
+		return true;
 	}
 	
 	public byte[] byteArrayToBitmap(byte[] byteData) 

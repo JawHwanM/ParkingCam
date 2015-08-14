@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.parkingcam.R;
@@ -58,32 +59,23 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 	public void onReceive(Context context, Intent intent)
 	{	
 		String action = intent.getAction();	// 이벤트 액션 종류 (이미지갱신 / 닫기)
-		if(Constants.WIDGET_ACTION_IMG_CLICK.equals(action))
-		{
-			Toast.makeText(context, "Image Event in Widget!", Toast.LENGTH_SHORT).show();
-			AppWidgetManager appWidgetMgr = AppWidgetManager.getInstance(context);
-			this.onUpdate(context, appWidgetMgr, appWidgetMgr.getAppWidgetIds(new ComponentName(context, getClass())));
-		}
 		
 		if(Constants.WIDGET_ACTION_CLS_CLICK.equals(action))
 		{
 			//TODO:: DB 삭제 이벤트 - mStrImageName(PK)
-			if("".equals(mStrImage) == false && "".equals(mStrImageName) == false)
+			File deleteFile = new File(mStrImage);
+			if(deleteFile.exists())
 			{
-				File deleteFile = new File(mStrImage);
-				if(deleteFile.exists())
-				{
-					deleteFile.delete();
-					mStrImage = "";
-					mStrImageName = "";
-					AppWidgetManager appWidgetMgr = AppWidgetManager.getInstance(context);
-					this.onUpdate(context, appWidgetMgr, appWidgetMgr.getAppWidgetIds(new ComponentName(context, getClass())));
-					Toast.makeText(context, "Delete Image!", Toast.LENGTH_SHORT).show();
-				}
-				else
-				{
-					Toast.makeText(context, "Have no Image!", Toast.LENGTH_SHORT).show();
-				}
+				deleteFile.delete();
+				mStrImage = "";
+				mStrImageName = "";
+				AppWidgetManager appWidgetMgr = AppWidgetManager.getInstance(context);
+				this.onUpdate(context, appWidgetMgr, appWidgetMgr.getAppWidgetIds(new ComponentName(context, getClass())));
+				Toast.makeText(context, "Delete Image!", Toast.LENGTH_SHORT).show();
+			}
+			else
+			{
+				Toast.makeText(context, "Have no Image!", Toast.LENGTH_SHORT).show();
 			}
 		}
 		
@@ -111,8 +103,6 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 	@Override
 	public void onEnabled(Context context)
 	{
-		mStrExt 		= Environment.getExternalStorageState();
-		mStrBaseFolder 	= Environment.getExternalStorageDirectory().getAbsolutePath() + Constants.PHOTO_SAVE_FOLDER;
 		super.onEnabled(context);
 	}
 	
@@ -172,18 +162,23 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 			updateViews.setViewVisibility(R.id.btnGPS, View.GONE);
 			updateViews.setImageViewResource(R.id.parkingImg, R.drawable.icn_camera);
 		}
-    			
-		PendingIntent imgClick = PendingIntent.getBroadcast(context, 0, new Intent(Constants.WIDGET_ACTION_IMG_CLICK), PendingIntent.FLAG_UPDATE_CURRENT);
-		updateViews.setOnClickPendingIntent(R.id.parkingImg, imgClick);
-		
-		PendingIntent clsClick = PendingIntent.getBroadcast(context, 0, new Intent(Constants.WIDGET_ACTION_CLS_CLICK), PendingIntent.FLAG_UPDATE_CURRENT);
-		updateViews.setOnClickPendingIntent(R.id.btnClose, clsClick);
 		
 		if("".equals(mStrImageName) == false)
 		{
+			System.out.println("mStrImageName="+mStrImageName);
+			PendingIntent clsClick = PendingIntent.getBroadcast(context, 0, new Intent(Constants.WIDGET_ACTION_CLS_CLICK), PendingIntent.FLAG_UPDATE_CURRENT);
+			updateViews.setOnClickPendingIntent(R.id.btnClose, clsClick);
+			
+			Intent itMemoDialog = new Intent(context, ParkingWidgetDialog.class);
+			itMemoDialog.putExtra("photoName", mStrImageName);
+			itMemoDialog.setData(Uri.parse(mStrImageName));
+			PendingIntent imgClick = PendingIntent.getActivity(context, 0, itMemoDialog, PendingIntent.FLAG_UPDATE_CURRENT);
+			updateViews.setOnClickPendingIntent(R.id.parkingImg, imgClick);
+			
 			Intent itMap = new Intent(context, ParkingMap.class);
 			itMap.putExtra("photoName", mStrImageName);
-	        PendingIntent gpsClick = PendingIntent.getActivity(context, 0, itMap, 0);
+			itMap.setData(Uri.parse(mStrImageName));
+			PendingIntent gpsClick = PendingIntent.getActivity(context, 0, itMap, PendingIntent.FLAG_UPDATE_CURRENT);
 			updateViews.setOnClickPendingIntent(R.id.btnGPS, gpsClick);
 		}
     	appWidgetMgr.updateAppWidget(appWidgetId, updateViews);
@@ -194,9 +189,11 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 	 */
 	public static String getLastImagePath()
 	{
-		String strFileData = "";
+		String strFileData = "";		
+		// 다운로드 경로를 외장메모리 사용자 지정 폴더로 함.
+		if("".equals(mStrExt) || mStrExt == null) mStrExt = Environment.getExternalStorageState();
+		if("".equals(mStrBaseFolder) || mStrBaseFolder == null) mStrBaseFolder = Environment.getExternalStorageDirectory().getAbsolutePath() + Constants.PHOTO_SAVE_FOLDER;
 		
-		// 다운로드 경로를 외장메모리 사용자 지정 폴더로 함.        
         if(mStrExt.equals(Environment.MEDIA_MOUNTED)) 
         {
             File dir = new File(mStrBaseFolder);

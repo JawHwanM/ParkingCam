@@ -9,7 +9,6 @@ package android.parkingcam.map;
 import java.util.List;
 import java.util.Locale;
 
-import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -22,9 +21,6 @@ import android.os.Bundle;
 import android.parkingcam.R;
 import android.parkingcam.activity.GMapTemplate;
 import android.parkingcam.common.Constants;
-import android.util.DisplayMetrics;
-import android.view.Window;
-import android.view.WindowManager;
 
 /**
  * Parking Map
@@ -58,7 +54,6 @@ public class ParkingMap extends GMapTemplate
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		this.requestWindowFeature(Window.FEATURE_NO_TITLE); 
 		super.onCreate(savedInstanceState);
 		super.initTemplate(this, R.layout.parking_map);
 		
@@ -95,13 +90,6 @@ public class ParkingMap extends GMapTemplate
     	super.onResume();
        	// 가로보기
 	    setScreenOrientation();
-	    
-	    DisplayMetrics displayMetrics = new DisplayMetrics();
-	    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);	    
-    	WindowManager.LayoutParams lpParams = getWindow().getAttributes();
-    	lpParams.width =  displayMetrics.widthPixels - 40;
-    	lpParams.height = displayMetrics.heightPixels- 80;
-    	this.getWindow().setAttributes(lpParams);
     }  
     
     /**
@@ -143,12 +131,7 @@ public class ParkingMap extends GMapTemplate
      */    
     private void initViewControl()
     {
-    	DisplayMetrics displayMetrics = new DisplayMetrics();
-	    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);	    
-    	WindowManager.LayoutParams lpParams = getWindow().getAttributes();
-    	lpParams.width =  displayMetrics.widthPixels - 40;
-    	lpParams.height = displayMetrics.heightPixels- 80;
-    	this.getWindow().setAttributes(lpParams);  	
+    	//	
     }
     
     /**
@@ -163,19 +146,12 @@ public class ParkingMap extends GMapTemplate
     	mDblLongitude 	= Constants.MAP_DEFAULT_LNG;
 		
 		Intent itCurIntent = getIntent();
-    	Bundle bundle 	= itCurIntent.getExtras();
+    	Bundle bundle 	= itCurIntent.getExtras();    	
    		if(bundle != null && "".equals(bundle) == false)
    		{
    			mStrPhotoName = itCurIntent.getExtras().getString("photoName");
-   			if("".equals(mStrPhotoName)==false && mStrPhotoName != null)
-   			{
-   				// TODO:: 데이터 조회
-   				System.out.println("Select 구문");
-   				System.out.println("PK(AppId_Date.png)="+mStrPhotoName);
-   			}
-   		}		
-   		
-   		
+   			//TODO::Select 구문			
+   		}
 	}
     
     /**

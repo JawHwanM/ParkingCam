@@ -331,7 +331,7 @@ public class GMapTemplate extends FragmentActivity
     @Override
 	public boolean onOptionsItemSelected(MenuItem item)
     {
-    	int intItemId = item.getItemId();
+    	//int intItemId = item.getItemId();
         
         return super.onOptionsItemSelected(item);
     }
@@ -658,9 +658,10 @@ public class GMapTemplate extends FragmentActivity
         }
         if (System.currentTimeMillis() <= mLnBackKeyPressedTime + 2000)
         {
+        	mToast.cancel();
         	moveTaskToBack(true);
         	finish();
-            mToast.cancel();
+        	android.os.Process.killProcess(android.os.Process.myPid());            
         }
     }
 

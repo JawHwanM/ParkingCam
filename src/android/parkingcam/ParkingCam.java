@@ -23,7 +23,6 @@ import android.parkingcam.activity.BaseTemplate;
 import android.parkingcam.camera.CameraCapture;
 import android.parkingcam.common.Constants;
 import android.parkingcam.manual.MainManual;
-import android.view.Window;
 
 /**
  * ParkingCam Main
@@ -52,8 +51,7 @@ public class ParkingCam extends BaseTemplate
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-    	super.onCreate(savedInstanceState);
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);        
+    	super.onCreate(savedInstanceState);       
         super.initTemplate(this, R.layout.parking_cam);
         
         initViewControl();
@@ -72,7 +70,6 @@ public class ParkingCam extends BaseTemplate
     	if(mBoolAppFirstLoading == true)
     	{
     		//TODO:: 사용 설명서 삽입
-    		showToastOnThread("First Loading!");
     		try
         	{
         		SharedPreferences.Editor edit = mSpfPrefer.edit();
@@ -89,9 +86,10 @@ public class ParkingCam extends BaseTemplate
     	}
     	else
     	{
-			boolean stateOfGPS = mClsLocationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    		boolean stateOfGPS = mClsLocationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER);
     		if(stateOfGPS)
-    		{    			
+    		{
+    			getCurLocation();
     			Intent itCameraCapture = new Intent(getContext(), CameraCapture.class);
     			startActivityForResult(itCameraCapture, 0);
     		}
@@ -105,6 +103,7 @@ public class ParkingCam extends BaseTemplate
 					@Override
 					public void onClick(DialogInterface dialog, int which) 
 					{
+						moveTaskToBack(true);
 						finish();
 					}
 				});
@@ -155,16 +154,7 @@ public class ParkingCam extends BaseTemplate
 	 */ 
     private void initViewControl()
     {
-    	/*final Button btnTake = (Button)findViewById(R.id.btnTake);
-    	btnTake.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v) 
-			{
-				Intent itCameraCapture = new Intent(v.getContext(), CameraCapture.class);
-				startActivityForResult(itCameraCapture, 0);
-			}		
-    	});*/
+    	//
     }
     
     /**
@@ -172,7 +162,9 @@ public class ParkingCam extends BaseTemplate
      */
     private void initLocationControl()
     {
-    	mClsLocationMgr = (LocationManager)getSystemService(Context.LOCATION_SERVICE);    	
+    	AppContext.setLatitude(0);
+    	AppContext.setLongitude(0);
+    	mClsLocationMgr = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
     	mClsLocationListener = new LocationListener()
     	{
     		/**
@@ -212,23 +204,33 @@ public class ParkingCam extends BaseTemplate
 			@Override
 			public void onProviderDisabled(String strData) {  }
     	};
-    	
+    }
+    
+    /**
+     * 현재 위치를 받아온다.
+     */
+    public void getCurLocation()
+    {
     	if(mClsLocationMgr != null)
     	{
     		String locProv = mClsLocationMgr.getBestProvider(getCriteria(), true);
-            mClsLocationMgr.requestLocationUpdates(locProv, 1000, 1, mClsLocationListener);
+            mClsLocationMgr.requestLocationUpdates(locProv, 2000, 10, mClsLocationListener);
     	}
     }
     
+    /**
+     * 위치 데이터 환경 설정
+     * @return
+     */
     public static Criteria getCriteria() 
     {
         Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        criteria.setAltitudeRequired(true);
-        criteria.setBearingRequired(true);		// 방향
-        criteria.setSpeedRequired(true);		// 속도
-        criteria.setCostAllowed(true);
-        criteria.setPowerRequirement(Criteria.POWER_HIGH);
+        criteria.setAccuracy(Criteria.ACCURACY_COARSE);		// 정확도
+        criteria.setAltitudeRequired(false);				// 고도, 높이 값을 얻어 올지를 결정
+        criteria.setSpeedRequired(false);					// 속도
+        criteria.setBearingRequired(false);					// 방향
+        criteria.setCostAllowed(true);						// 위치 정보를 얻어 오는데 들어가는 금전적 비용
+        criteria.setPowerRequirement(Criteria.POWER_LOW);	// 전원 소비량		
         return criteria;
     }
     

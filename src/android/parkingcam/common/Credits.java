@@ -9,7 +9,6 @@ package android.parkingcam.common;
 import android.os.Bundle;
 import android.parkingcam.R;
 import android.parkingcam.activity.BaseTemplate;
-import android.view.Window;
 
 /**
  * Credits
@@ -35,7 +34,6 @@ public class Credits extends BaseTemplate
     public void onCreate(Bundle savedInstanceState)
     {
     	super.onCreate(savedInstanceState);
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.initTemplate(this, R.layout.credits);
     }
     
