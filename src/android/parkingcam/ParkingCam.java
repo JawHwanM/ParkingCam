@@ -78,7 +78,7 @@ public class ParkingCam extends BaseTemplate
         		SharedPreferences.Editor edit = mSpfPrefer.edit();
     	    	edit.putBoolean(Constants.APP_FIRST_LOADING,  false);
     	    	edit.commit();
-    	    	
+    			
     	    	Intent itMainManual = new Intent(getContext(), MainManual.class);
     			startActivityForResult(itMainManual, 0);
         	}
@@ -91,7 +91,7 @@ public class ParkingCam extends BaseTemplate
     	{
 			boolean stateOfGPS = mClsLocationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER);
     		if(stateOfGPS)
-    		{
+    		{    			
     			Intent itCameraCapture = new Intent(getContext(), CameraCapture.class);
     			startActivityForResult(itCameraCapture, 0);
     		}
@@ -143,6 +143,12 @@ public class ParkingCam extends BaseTemplate
 		mClsLocationListener = null;
 		super.onDestroy();
 	}
+	
+	@Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+    }
     
 	/**
 	 * View관련 컨트롤을 초기화한다.

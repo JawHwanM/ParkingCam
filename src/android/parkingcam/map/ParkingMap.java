@@ -6,20 +6,22 @@
 */
 package android.parkingcam.map;
 
+import java.util.List;
+import java.util.Locale;
+
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
-import android.parkingcam.AppContext;
 import android.parkingcam.R;
 import android.parkingcam.activity.GMapTemplate;
 import android.parkingcam.common.Constants;
-import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.view.Window;
 import android.view.WindowManager;
@@ -40,15 +42,14 @@ import android.view.WindowManager;
  */
 public class ParkingMap extends GMapTemplate
 {
-	private SharedPreferences 	mSpfPreferences = null;	/**< 프레퍼런스 */
-	private boolean				mBoolSatellite;			/**< 위성지도, 일반지도 여부  */
+	protected float	mFlMapLevel	= 0;	/**< 기본 레벨 */
+	private boolean	mBoolSatellite;		/**< 위성지도, 일반지도 여부  */
+	private Marker	mClsMarker;			/**< 현재위치마커 */
 	
-	private Marker	mClsMarker;							/**< 현재위치마커 */
-	
-	private String mStrPhotoDate = "";
-	private String mStrPhotoMemo = "";
-	private double mDblLatitude = 0;
-	private double mDblLongitude = 0;
+	private String mStrPhotoName = "";	/**< 사진명	*/
+	private String mStrPhotoMemo = "";	/**< 사진메모	*/
+	private double mDblLatitude = 0;	/**< Lat좌표	*/
+	private double mDblLongitude = 0;	/**< Lng좌표	*/
 	
 	/**
      * Activity 생성 이벤트
@@ -60,13 +61,11 @@ public class ParkingMap extends GMapTemplate
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE); 
 		super.onCreate(savedInstanceState);
 		super.initTemplate(this, R.layout.parking_map);
-   		
-		mSpfPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		
-        initMapControl();
         initViewControl();
+        initDataControl();
 	}
-	
+
 	/**
      * Activity 시작 이벤트
      */    
@@ -75,6 +74,7 @@ public class ParkingMap extends GMapTemplate
     {
     	super.onStart();
 		super.setSatellite(mBoolSatellite);
+		doDrawParkingMap();
     }
    
     /**
@@ -100,7 +100,7 @@ public class ParkingMap extends GMapTemplate
 	    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);	    
     	WindowManager.LayoutParams lpParams = getWindow().getAttributes();
     	lpParams.width =  displayMetrics.widthPixels - 40;
-    	lpParams.height = displayMetrics.heightPixels- 100;
+    	lpParams.height = displayMetrics.heightPixels- 80;
     	this.getWindow().setAttributes(lpParams);
     }  
     
@@ -119,34 +119,23 @@ public class ParkingMap extends GMapTemplate
     @Override
 	public void onDestroy()
     {  	
-    	mClsMarker = null;
+    	mStrPhotoName = null;
+    	mStrPhotoMemo = null;
+    	
+    	if(mClsMarker != null)
+    	{
+    		mClsMarker.remove();
+        	mClsMarker = null;
+    	}
     	
     	super.releaseTemplate();
     	super.onDestroy();
     }
     
-    /**
-     * 지도 컨트롤을 초기화한다.
-     */    
-    private void initMapControl()
+    @Override
+    public void onBackPressed()
     {
-    	DisplayMetrics displayMetrics = new DisplayMetrics();
-    	getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-    	int deviceDisplay = displayMetrics.widthPixels * displayMetrics.heightPixels;
-    	int intTextSize = 0;
-    	
-    	if(deviceDisplay > Constants.DEVICE_DISPLAY_XLARGE) intTextSize = 28;
-    	else if(deviceDisplay > Constants.DEVICE_DISPLAY_LARGE) intTextSize = 18;
-    	else if(deviceDisplay > Constants.DEVICE_DISPLAY_MEDIUM) intTextSize = 16;
-    	else intTextSize = 14;
-    	
-    	String strFontColor = "#9F2700";
-        String strBackColor = "#A7DF00"; 
-        
-    	Bitmap bmIcon = BitmapFactory.decodeResource(this.getResources(), R.drawable.icn_leaf);
-        /*mClsMarker = new Marker({	position: new LatLng(AppContext.getLatitude(), AppContext.getLongitude()), 
-					    	   		map: super.getMap(),
-					    	   		title: '마커' });*/
+        super.onBackPressed();
     }
     
     /**
@@ -158,14 +147,41 @@ public class ParkingMap extends GMapTemplate
 	    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);	    
     	WindowManager.LayoutParams lpParams = getWindow().getAttributes();
     	lpParams.width =  displayMetrics.widthPixels - 40;
-    	lpParams.height = displayMetrics.heightPixels- 100;
-    	this.getWindow().setAttributes(lpParams);
+    	lpParams.height = displayMetrics.heightPixels- 80;
+    	this.getWindow().setAttributes(lpParams);  	
     }
+    
+    /**
+	 * Data관련 컨트롤 초기화한다.
+	 */
+	private void initDataControl() 
+	{
+		mFlMapLevel 	= MAP_LEVEL_DEFAULT_VIEW;
+		mStrPhotoName	= "";
+		mStrPhotoMemo	= "";
+		mDblLatitude 	= Constants.MAP_DEFAULT_LAT;
+    	mDblLongitude 	= Constants.MAP_DEFAULT_LNG;
+		
+		Intent itCurIntent = getIntent();
+    	Bundle bundle 	= itCurIntent.getExtras();
+   		if(bundle != null && "".equals(bundle) == false)
+   		{
+   			mStrPhotoName = itCurIntent.getExtras().getString("photoName");
+   			if("".equals(mStrPhotoName)==false && mStrPhotoName != null)
+   			{
+   				// TODO:: 데이터 조회
+   				System.out.println("Select 구문");
+   				System.out.println("PK(AppId_Date.png)="+mStrPhotoName);
+   			}
+   		}		
+   		
+   		
+	}
     
     /**
 	 * 데이터를 조회한다.
 	 */
-    private void doDrawLandMap()
+    private void doDrawParkingMap()
 	{
     	runOnUiThread(new Runnable()
         { 
@@ -184,25 +200,49 @@ public class ParkingMap extends GMapTemplate
 	{	
 		try
 		{
-			Intent itCurIntent = getIntent();
-	    	Bundle bundle 	= itCurIntent.getExtras();
-	   		if(bundle != null && "".equals(bundle) == false)
-	   		{
-	   			mStrPhotoDate = itCurIntent.getExtras().getString("photoDate");
-	   			mStrPhotoMemo = itCurIntent.getExtras().getString("photoMemo");
-	   			mDblLongitude = itCurIntent.getExtras().getDouble("cx");
-	   			mDblLatitude  = itCurIntent.getExtras().getDouble("cy");
-	   			
-	   			if(mDblLongitude > 0.0 && mDblLatitude > 0.0)
-	   			{
-	   				//
-	   			}
-	   			super.setZoomCenter(MAP_LEVEL_DETAIL_VIEW, mDblLongitude, mDblLatitude);
-	   		}
+			mClsMarker = mGmMap.addMarker(new MarkerOptions()
+				     .position(new LatLng(mDblLatitude, mDblLongitude))
+				     .title(getLocationName())
+				     .snippet(mStrPhotoMemo)
+				     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)) //BitmapDescriptorFactory.fromResource(R.drawable.icn_leaf)
+				     .draggable(false));
+			super.setZoomCenter(MAP_LEVEL_DETAIL_VIEW, mDblLatitude, mDblLongitude);
+						
+			System.out.println("mStrPhotoName="+mStrPhotoName);
+   			System.out.println("mStrPhotoMemo="+mStrPhotoMemo);
+   			System.out.println("mDblLatitude="+mDblLatitude);
+   			System.out.println("mDblLongitude="+mDblLongitude); 		
 		}
 		catch(Exception ex)
 		{
 			ex.printStackTrace();
 		}
+	}
+	
+	/**
+	 * 좌표를 주소로 변환
+	 * @return
+	 */
+	private String getLocationName()
+	{
+		List<Address> lstAddr;
+		StringBuffer strbfAddr = new StringBuffer();
+		try
+		{
+			Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+			lstAddr = geocoder.getFromLocation(mDblLatitude, mDblLongitude, 1);
+			if(lstAddr != null && lstAddr.size() > 0)
+			{
+				String strAddr = lstAddr.get(0).getAddressLine(0).toString();				
+				strAddr = strAddr.replace(lstAddr.get(0).getCountryName(),"");
+				strbfAddr.append(strAddr.trim());
+			}
+		}
+		catch(Exception ex)
+		{
+			showToastOnThread("주소 취득 실패");
+			ex.printStackTrace();
+		}
+    	return strbfAddr.toString();
 	}
 }

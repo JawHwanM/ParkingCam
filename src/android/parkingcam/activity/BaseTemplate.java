@@ -29,6 +29,9 @@ import android.widget.Toast;
  */
 public class BaseTemplate extends Activity
 {
+	private long mLnBackKeyPressedTime = 0;
+    private Toast mToast;
+    
 	private int mIntRayoutId		= 0;					/**< 레이아웃 ID */
 	protected Context mCtxContext	= null;					/**< 컨텍스트 */
 	protected SharedPreferences mSpfPrefer = null;			/**< 프레퍼런스*/
@@ -198,5 +201,28 @@ public class BaseTemplate extends Activity
     	}
     	
     	return strCalDate;
+    }
+    
+    @Override
+    public void onBackPressed()
+    {
+        if (System.currentTimeMillis() > mLnBackKeyPressedTime + 2000)
+        {
+        	mLnBackKeyPressedTime = System.currentTimeMillis();
+            showGuide();
+            return;
+        }
+        if (System.currentTimeMillis() <= mLnBackKeyPressedTime + 2000)
+        {
+        	moveTaskToBack(true);
+        	finish();
+            mToast.cancel();
+        }
+    }
+
+    public void showGuide()
+    {
+    	mToast = Toast.makeText(getBaseContext(), "\'뒤로\'버튼을 한번 더 누르시면 종료됩니다.", Toast.LENGTH_SHORT);
+    	mToast.show();
     }
 }

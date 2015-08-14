@@ -32,6 +32,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.parkingcam.R;
+import android.parkingcam.common.Constants;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.text.method.LinkMovementMethod;
@@ -50,8 +51,11 @@ import android.widget.Toast;
  */
 public class GMapTemplate extends FragmentActivity
 {
-	protected static final float	MAP_LEVEL_DEFAULT_VIEW		= 7;		/**< 기본 레벨 */
-	protected static final float	MAP_LEVEL_DETAIL_VIEW		= 16;		/**< 상세 레벨 */
+	private long mLnBackKeyPressedTime = 0;
+    private Toast mToast;
+    
+	protected static final float	MAP_LEVEL_DEFAULT_VIEW		= 8;		/**< 기본 레벨 */
+	protected static final float	MAP_LEVEL_DETAIL_VIEW		= 17;		/**< 상세 레벨 */
 	protected static final float	MAP_LEVEL_MAX_DETAIL_VIEW	= 19;		/**< 최대 레벨 */
 	private Marker mClsLocMarker								= null;		/**< 마커 */
 	protected LocationManager mLmLocationMgr;								/**< 로케이션관리자 */
@@ -84,7 +88,7 @@ public class GMapTemplate extends FragmentActivity
 	        
 	        this.mClsLocMarker = this.mGmMap.addMarker(new MarkerOptions().position(objDefaultCenter));
 	        this.mClsLocMarker.setVisible(false);
-	        this.mGmMap.setMyLocationEnabled(false);	// 내 위치 보기는 안보이도록 한다.
+	        this.mGmMap.setMyLocationEnabled(true);	// 내 위치 보기는 안보이도록 한다.
 	        this.mGmMap.getUiSettings().setCompassEnabled(true);
     	}
     	catch(Exception ex)
@@ -153,7 +157,7 @@ public class GMapTemplate extends FragmentActivity
 	 */
     protected LatLng getDefaultLocation()
     {
-    	return new LatLng(37.477269, 126.981631); //사당역
+    	return new LatLng(Constants.MAP_DEFAULT_LAT, Constants.MAP_DEFAULT_LNG); // 사당역
     }
     
     
@@ -336,17 +340,17 @@ public class GMapTemplate extends FragmentActivity
      * 중심좌표로 이동한다.
      * @param fltZoomLevel 확대레벨
      * @param fltBearing 방향
-     * @param dblCoordX X좌표
-     * @param dblCoordY Y좌표
+     * @param dblLng X좌표
+     * @param dblLat Y좌표
      */
-    protected void setCenter(float fltZoomLevel, float fltBearing, double dblCoordX, double dblCoordY)
+    protected void setCenter(float fltZoomLevel, float fltBearing, double dblLat, double dblLng)
     {
     	try
     	{
-	    	if(dblCoordX > 0 && dblCoordY > 0)
+	    	if(dblLat > 0 && dblLng > 0)
 	    	{
 		     	CameraPosition cameraPosition = new CameraPosition.Builder().
-		                target(new LatLng(dblCoordY, dblCoordX)).
+		                target(new LatLng(dblLat, dblLng)).
 		                //tilt(degrees).
 		                zoom(fltZoomLevel).
 		                bearing(fltBearing).
@@ -364,18 +368,18 @@ public class GMapTemplate extends FragmentActivity
      * 중심좌표로 이동한다.
      * @param fltZoomLevel 확대레벨
      * @param fltBearing 방향
-     * @param dblCoordX X좌표
-     * @param dblCoordY Y좌표
+     * @param dblLng X좌표
+     * @param dblLat Y좌표
      * @param boolAnimate 애니메이션여부
      */
-    protected void setCenter(float fltZoomLevel, float fltBearing, double dblCoordX, double dblCoordY, boolean boolAnimate)
+    protected void setCenter(float fltZoomLevel, float fltBearing, double dblLat, double dblLng, boolean boolAnimate)
     {
     	try
     	{
-	    	if(dblCoordX > 0 && dblCoordY > 0)
+	    	if(dblLat > 0 && dblLng > 0)
 	    	{
 		     	CameraPosition cameraPosition = new CameraPosition.Builder().
-		                target(new LatLng(dblCoordY, dblCoordX)).
+		                target(new LatLng(dblLat, dblLng)).
 		                //tilt(degrees).
 		                zoom(fltZoomLevel).
 		                bearing(fltBearing).
@@ -399,18 +403,18 @@ public class GMapTemplate extends FragmentActivity
     /**
      * 중심좌표로 이동한다.
      * @param fltBearing 방향
-     * @param dblCoordX X좌표
-     * @param dblCoordY Y좌표
+     * @param dblLng X좌표
+     * @param dblLat Y좌표
      */
-    protected void setCenter(float fltBearing, double dblCoordX, double dblCoordY)
+    protected void setCenter(float fltBearing, double dblLat, double dblLng)
     {
     	try
     	{
-	    	if(dblCoordX > 0 && dblCoordY > 0)
+	    	if(dblLat > 0 && dblLng > 0)
 	    	{
 		    	float fltZoom = this.getZoom();
 		     	CameraPosition cameraPosition = new CameraPosition.Builder().
-		                target(new LatLng(dblCoordY, dblCoordX)).
+		                target(new LatLng(dblLat, dblLng)).
 		                zoom(fltZoom).
 		                bearing(fltBearing).
 		                build();
@@ -425,14 +429,14 @@ public class GMapTemplate extends FragmentActivity
     
     /**
      * 중심좌표로 이동한다.
-     * @param dblCoordX X좌표
-     * @param dblCoordY Y좌표
+     * @param dblLng X좌표
+     * @param dblLat Y좌표
      */      
-    protected void setCenter(double dblCoordX, double dblCoordY)
+    protected void setCenter(double dblLat, double dblLng)
     {
     	try
     	{
-    		if(dblCoordX > 0 && dblCoordY > 0) mGmMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(dblCoordY, dblCoordX)));
+    		if(dblLat > 0 && dblLng > 0) mGmMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(dblLat, dblLng)));
        	}
     	catch(Exception ex)
     	{
@@ -476,14 +480,14 @@ public class GMapTemplate extends FragmentActivity
     /**
      * 중심좌표로 이동한다.
      * @param fltZoomLevel 확대레벨
-     * @param dblCoordX X좌표
-     * @param dblCoordY Y좌표
+     * @param dblLng X좌표
+     * @param dblLat Y좌표
      */    
-    protected void setZoomCenter(float fltZoomLevel, double dblCoordX, double dblCoordY)
+    protected void setZoomCenter(float fltZoomLevel, double dblLat, double dblLng)
     {
     	try
     	{
-    		if(dblCoordX > 0 && dblCoordY > 0) mGmMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(dblCoordY, dblCoordX), fltZoomLevel));
+    		if(dblLat > 0 && dblLng > 0) mGmMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(dblLat, dblLng), fltZoomLevel));
        	}
     	catch(Exception ex)
     	{
@@ -519,12 +523,12 @@ public class GMapTemplate extends FragmentActivity
 	    
     /**
      * 중심좌표로 이동한다.
-     * @param dblCoordX X좌표 
-     * @param dblCoordY Y좌표
+     * @param dblLng X좌표 
+     * @param dblLat Y좌표
      */
-    protected void setDetailZoomCenter(double dblCoordX, double dblCoordY)
+    protected void setDetailZoomCenter(double dblLat, double dblLng)
     {
-    	if(dblCoordX > 0 && dblCoordY > 0) this.setZoomCenter(MAP_LEVEL_DETAIL_VIEW, new LatLng(dblCoordY, dblCoordX), true);
+    	if(dblLat > 0 && dblLng > 0) this.setZoomCenter(MAP_LEVEL_DETAIL_VIEW, new LatLng(dblLat, dblLng), true);
     }
         
     /**
@@ -641,5 +645,28 @@ public class GMapTemplate extends FragmentActivity
     	 */       	
     	@Override
 		public void onProviderEnabled(String provider) { }
+    }
+    
+    @Override
+    public void onBackPressed()
+    {
+        if (System.currentTimeMillis() > mLnBackKeyPressedTime + 2000)
+        {
+        	mLnBackKeyPressedTime = System.currentTimeMillis();
+            showGuide();
+            return;
+        }
+        if (System.currentTimeMillis() <= mLnBackKeyPressedTime + 2000)
+        {
+        	moveTaskToBack(true);
+        	finish();
+            mToast.cancel();
+        }
+    }
+
+    public void showGuide()
+    {
+    	mToast = Toast.makeText(getBaseContext(), "\'뒤로\'버튼을 한번 더 누르시면 종료됩니다.", Toast.LENGTH_SHORT);
+    	mToast.show();
     }
 }

@@ -1,7 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical"
-    android:background="@color/khaki" >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" android:padding="2dip" android:layout_width="fill_parent" android:layout_height="fill_parent">
+	<LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:background="@color/khaki" android:orientation="horizontal">
+		<!-- <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:gravity="right" android:orientation="horizontal">
+			<ImageButton	android:id="@+id/ibtClose"
+					        android:layout_width="30dp"
+					        android:layout_height="30dp"
+					        android:layout_gravity="right|center_vertical"
+					        android:layout_marginRight="8dp"
+					        android:background="@color/transparent"
+					        android:src="@drawable/btn_close" />
+ 		</LinearLayout> -->
+	</LinearLayout>
+	<LinearLayout android:layout_width="fill_parent" android:layout_height="fill_parent" android:orientation="vertical" android:padding="1dip" android:background="@color/khaki">		
+		<TableLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:padding="2dip" android:stretchColumns="*">
+			<TableRow android:padding="5dip" android:layout_width="fill_parent" android:layout_gravity="center">
+				<TableLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="90" android:stretchColumns="*">
+					<TableRow>
+					    <TextView 	android:layout_width="0dp" android:layout_height="100dip" android:layout_weight="10"/>
+					</TableRow>
+					<TableRow>
+					    <TextView 	android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="20"/>
+					    <!-- <Button		android:id="@+id/btnTake"
+									android:layout_width="0dp"
+									android:layout_height="wrap_content"
+									android:layout_weight="60"
+									android:layout_gravity="center_vertical|center_horizontal"
+									android:gravity="center_vertical|center_horizontal"
+									android:text="@string/parking_take_picture" /> -->
+					    <TextView 	android:layout_width="0dp" 
+					        		android:layout_height="wrap_content" 
+					        		android:layout_weight="60" 
+					        		android:layout_gravity="center_vertical|center_horizontal"
+									android:gravity="center_vertical|center_horizontal"
+									android:textSize="30sp"
+									android:textColor="@color/black"
+					        		android:text="@string/manual_2"/>
+					    <TextView 	android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="20"/>
+					</TableRow>
+				</TableLayout>
+			</TableRow>
+		</TableLayout>
+	</LinearLayout>
 </LinearLayout>

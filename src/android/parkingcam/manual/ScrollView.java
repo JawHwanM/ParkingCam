@@ -176,7 +176,6 @@ public class ScrollView extends ViewGroup
 			int intGap = getScrollX() - mCurPage * getWidth();
 			int intNextPage = mCurPage;
 			
-			System.out.println("Child Count ="+getChildCount());
 			if((intVelocity > Constants.SNAP_VELOCITY || intGap < -getWidth()/2) && mCurPage > 0)
 			{
 				intNextPage--;

@@ -43,16 +43,15 @@ import android.parkingcam.common.CameraButton;
 import android.parkingcam.common.Constants;
 import android.parkingcam.widget.ParkingWidgetProvider;
 import android.util.DisplayMetrics;
-import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnDragListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -71,10 +70,7 @@ import android.widget.Toast;
  * </pre>
  */
 public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callback
-{
-	private long mLnBackKeyPressedTime = 0;
-    private Toast mToast;
-	
+{	
 	private String mStrMessage					= "";		/**< Progress Message	*/
 	private String mStrCurDate 					= "";		/**< 현재 날짜/시각 */
     private String mStrSavePath;   							/**< 저장 경로 	*/
@@ -153,6 +149,13 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		
 		setScreenOrientation();
 		
+		DisplayMetrics displayMetrics = new DisplayMetrics();
+	    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);	    
+    	WindowManager.LayoutParams lpParams = getWindow().getAttributes();
+    	lpParams.width =  displayMetrics.widthPixels - 40;
+    	lpParams.height = displayMetrics.heightPixels- 80;
+    	this.getWindow().setAttributes(lpParams);
+		
 		mBoolSdCardMounted = checkSDCardState();
 
 		// SD카드와 관련된 이벤트를 필터링 하여 수신
@@ -200,7 +203,6 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	@Override  
 	public void onDestroy() 
 	{		
-		mToast 				= null;
 		mByteImgData 		= null;
 		mBtnCamera 			= null;
 		mLlCameraNextMenu 	= null;
@@ -220,24 +222,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	@Override
     public void onBackPressed()
     {
-        if (System.currentTimeMillis() > mLnBackKeyPressedTime + 2000)
-        {
-        	mLnBackKeyPressedTime = System.currentTimeMillis();
-            showGuide();
-            return;
-        }
-        if (System.currentTimeMillis() <= mLnBackKeyPressedTime + 2000)
-        {
-        	moveTaskToBack(true);
-        	finish();
-            mToast.cancel();
-        }
-    }
-
-    public void showGuide()
-    {
-    	mToast = Toast.makeText(getBaseContext(), "\'뒤로\'버튼을 한번 더 누르시면 종료됩니다.", Toast.LENGTH_SHORT);
-    	mToast.show();
+        super.onBackPressed();
     }
 	
 	/**
@@ -250,8 +235,8 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		DisplayMetrics displayMetrics = new DisplayMetrics();
 	    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);	    
     	WindowManager.LayoutParams lpParams = getWindow().getAttributes();
-    	lpParams.width =  displayMetrics.widthPixels - 40;
-    	lpParams.height = displayMetrics.heightPixels- 100;
+    	lpParams.width =  displayMetrics.widthPixels;	//-40
+    	lpParams.height = displayMetrics.heightPixels- 80;
     	
     	lpParams.screenBrightness = 1;
     	
@@ -261,7 +246,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		// 현재 보여지고 있는 액티비티 상에서 입력값이 없어도 계속 화면이 꺼지지 않고 유지되도록 한다.
 		objWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		
-		CameraButton btnClose = (CameraButton)findViewById(R.id.btnClose);			
+		/*CameraButton btnClose = (CameraButton)findViewById(R.id.btnClose);			
 		btnClose.setImage(R.drawable.icn_camera_close, 0, 0);
 		btnClose.setOnClickListener(new OnClickListener()
 		{
@@ -271,7 +256,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 				moveTaskToBack(true);
 				finish();
 			}
-		});
+		});*/
 		
 		mBtnCamera = (CameraButton)findViewById(R.id.btnCamera);
 		mBtnCamera.setImage(R.drawable.icn_camera, 0, 0);
@@ -295,7 +280,9 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			@Override
 			public void onClick(View v)
 			{
-				showToastOnThread("Map...");
+				/*Intent itMap = new Intent(getContext(), ParkingMap.class);
+				itMap.putExtra("photoName", "");
+				startActivity(itMap);*/
 			}
 		});
 		
@@ -305,7 +292,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			@Override
 			public void onClick(View v)
 			{
-				showToastOnThread("Again...");
+				startCameraCapture();
 			}
 		});
 		
@@ -318,10 +305,10 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 				if(AppContext.getLatitude() > 0 && AppContext.getLongitude() > 0)
 				{
 					showToastOnThread("Save...");
-					/*if(doSaveImage())
+					if(doSaveImage())
 					{
-						//doSaveData();
-					}*/
+						doSaveData();
+					}
 				}
 				else
 				{
@@ -659,8 +646,11 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 				stopCamera();
 				toggleCameraButton(false);
 				
-				mProgressDialog.dismiss();
-	    		mProgressDialog = null;
+				if(mProgressDialog != null)
+				{
+					mProgressDialog.dismiss();
+		    		mProgressDialog = null;
+				}
 			}
 			catch(Exception ex)
 			{
@@ -773,7 +763,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	        public void onTick(long millisUntilFinished)
 	        {
 	        	mStrMessage += getString(R.string.dot);
-	        	mProgressDialog.setMessage(mStrMessage);
+	        	if(mProgressDialog != null) mProgressDialog.setMessage(mStrMessage);
 	        }
 
 	        @Override
@@ -804,16 +794,15 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	          				padZeros(calTraceDate.get(Calendar.SECOND), 2);
 			// 사진 임시 저장 
 	        mByteImgData = byteArrayToBitmap(mByteImgData);
-			fosImage = new FileOutputStream(mStrSavePath + File.separator + mStrCurDate+".png");
+			fosImage = new FileOutputStream(mStrSavePath + File.separator + Constants.PARKING_CAM_APP_ID + "_" +mStrCurDate+".png");
 			fosImage.write(mByteImgData, 0, mByteImgData.length);			
 			fosImage.close();
 			
-			AppWidgetManager appWidgetMgr = AppWidgetManager.getInstance(this);
+			/*AppWidgetManager appWidgetMgr = AppWidgetManager.getInstance(this);
 			Intent itUpdate = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
 			itUpdate.setClass(this, ParkingWidgetProvider.class);
 			itUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetMgr.getAppWidgetIds(new ComponentName(this, ParkingWidgetProvider.class)));
-			this.sendBroadcast(itUpdate);
-			showToastOnThread("Image Save Success");
+			this.sendBroadcast(itUpdate);*/
 			//compareTime("이미지 저장 끝");
 		}
 		catch (Exception e) 
@@ -827,8 +816,6 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		{
 			fosImage = null;
 			mByteImgData = null;
-			moveTaskToBack(true);
-			finish();
 		}
 		return true;
 	}
@@ -843,7 +830,10 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		try
 		{
 			//TODO :: DB Insert 필요
-			System.out.println("날짜="+mStrCurDate);
+			final EditText tbxPhotoMemo	= (EditText)findViewById(R.id.etMemo);    	
+			final String strPhotoMemo	= tbxPhotoMemo.getText().toString();
+			System.out.println("메모="+strPhotoMemo);
+			System.out.println("사진명="+Constants.PARKING_CAM_APP_ID+"_"+mStrCurDate);
 			System.out.println("X좌표="+AppContext.getLongitude());
 			System.out.println("Y좌표="+AppContext.getLatitude());
 			
@@ -852,7 +842,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			itUpdate.setClass(this, ParkingWidgetProvider.class);
 			itUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetMgr.getAppWidgetIds(new ComponentName(this, ParkingWidgetProvider.class)));
 			this.sendBroadcast(itUpdate);
-			showToastOnThread("Data Save Success");
+			//showToastOnThread("Data Save Success");
 			//compareTime("사진정보 저장 끝");
 		}
 		catch (Exception e) 
@@ -911,7 +901,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		Calendar now = Calendar.getInstance();
 		long lngCurTime = now.getTimeInMillis();
 		mLngCurTime = lngCurTime;
-	}*/
+	}*/	
 	
 	/**
 	 * 시스템 설정값이 변경되면 발생하는 이벤트
