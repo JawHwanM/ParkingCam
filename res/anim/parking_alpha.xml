@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android" >
+    <alpha
+        android:fromAlpha="0"
+        android:toAlpha="1.0"
+        /> 
+</set>
+<!--
+투명도 제어 애니메이션 효과 알파
+	float 형식 값:
+		*fromAlpha	시작 투명도
+		*toAlpha	끝 투명도
+		>설명:
+			0.0 완전히 투명
+			1.0 완전히 불투명
+			0.0-1.0 사이의 float 데이터 형식 숫자
+	long 정수 값:
+		*duration 지속 시간
+		>설명: 시간은 밀리초 단위 (1000 1초)
+-->

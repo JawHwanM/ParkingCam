@@ -94,7 +94,7 @@ public class ParkDBAdapter
 	public Cursor selectQuery(String strTableName, String selection, String[] selectionArgs, String strSortOrder)
 	{
 		return mSdDataBase.query(strTableName, null, selection, selectionArgs, null, null, strSortOrder);
-	}    
+	}
 
 
 	/**

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android" >
+	<scale
+	    android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+	    android:fromXScale="0.0"
+	    android:toXScale="1.4"
+	    android:fromYScale="0.0"
+	    android:toYScale="1.4"
+	    android:startOffset="700"
+	    android:pivotX="50%"
+	    android:pivotY="50%"
+	    />    
+</set>
+<!--
+사이즈 신축 애니메이션 효과 scale
+	속성:
+		*interpolator 애니메이션 효과
+			@android:anum/ 에서 가져와서 사용 (android.res.anim)
+			>세 가지 애니메이션 효과:
+				accelerate_decelerate_interpolator 가속 - 감속
+				accelerate_interpolator 가속
+				decelerate_interpolator 감속
+	float 형식 값:
+		*fromXScale X 시작
+		*toXScale 	X 끝
+		*fromYScale Y 시작
+		*toYScale 	Y 끝
+		*startOffset 지연시간
+		>설명:
+			-속성 값
+			0.0 표현 안됨
+			1.0 정상
+			값 < 1.0 수축
+			값 > 1.0 확대
+		*pivotX X 좌표 시작 위치
+		*pivotY Y 좌표 시작 위치
+		설명:
+			X, Y 값의 범위 0%-100%
+			50% X 또는 Y축 좌표 에서 위치
+	long 정수 값:
+		*duration 지속시간
+		>설명: 시간은 밀리초 단위 (1000 1초)
+	bool 형 값:
+		*fillAfter true 이면 애니매이션 상태 유지
+ -->

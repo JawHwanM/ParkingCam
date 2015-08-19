@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android" >
+	<rotate    
+		android:interpolator="@android:anim/accelerate_decelerate_interpolator"   
+		android:fromDegrees="0"    
+		android:toDegrees="+350"            
+		android:pivotX="50%"    
+		android:pivotY="50%"/>
+</set>
+<!--
+rotate 회전 애니메이션 효과
+	속성:
+		*interpolator 지정하지 애니메이션 삽입 그릇
+			@android:anum/ 에서 가져와서 사용 (android.res.anim)
+			>세 가지 애니메이션 효과:
+				accelerate_decelerate_interpolator 가속 - 감속
+				accelerate_interpolator 가속
+				decelerate_interpolator 감속
+	float 형식 값:
+		fromDegrees	시작 각도
+		toDegrees	끝 각도
+		>설명:
+			(0 from— — to 플러스: 시계 방향으로 회전)
+			(0 from— — to 음수: 반시계방향으로)
+		*pivotX X 시작
+		*pivotY Y 시작
+		 >설명:
+			X, Y 값의 범위 0%-100%
+			50% X 또는 Y축 좌표 에서 위치
+	long 정수 값:
+		*duration 지속시간
+		>설명: 시간은 밀리초 단위(1000 1초)
+-->    

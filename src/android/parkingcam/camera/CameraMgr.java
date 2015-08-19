@@ -266,7 +266,7 @@ public class CameraMgr
 				{
 					mCmrCamera.setDisplayOrientation(90);
 				}
-			}
+			}			
 		}
 		catch(Exception ex)
 		{

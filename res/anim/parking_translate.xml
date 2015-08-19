@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android" >
+ 	<translate	
+	    android:fromXDelta="30"    
+		android:toXDelta="-80"    
+		android:fromYDelta="30"    
+		android:toYDelta="300"/> 
+</set>
+<!--
+translate 위치 이동 애니메이션 효과
+	정수 값:
+		*fromXDelta	X 시작
+		*toXDelta	X 끝
+		*fromYDelta	Y 시작
+		*toYDelta	Y 끝
+		>주의:
+			지정된 fromXType toXType fromYType toYType 값은
+			현재 위치 상대적인 값
+	long 정수 값:
+		*duration 지속시간
+		>설명: 시간은 밀리초 단위(1000 1초)
+-->
