@@ -36,7 +36,7 @@ public class Constants
 	
 	public static final String PHOTO_SAVE_FOLDER 		= "/parkingcam";	/**< 사진저장 폴더	*/
 	public static final long COUNTDOWN_MAX 				= 3000;				/**< 사진촬영 지연시간	**/
-	public static final long ANIMATE_DURATION 			= 1500;				/**< 애니매이션 효과시간	**/
+	public static final long ANIMATE_DURATION 			= 1000;				/**< 애니매이션 효과시간	**/
 	
 	public static final String WIDGET_ACTION_IMG_CLICK	= "android.appwidget.action.ACTION_IMG_CLICK";	/**< 위젯 이미지 클릭	*/
 	public static final String WIDGET_ACTION_CLS_CLICK	= "android.appwidget.action.ACTION_CLS_CLICK";	/**< 위젯 닫기 클릭	*/

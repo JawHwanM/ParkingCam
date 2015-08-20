@@ -105,6 +105,8 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	private String mStrMessage					= "";		/**< Progress Message	*/
 	private String mStrCurDate 					= "";		/**< 현재 날짜/시각 */
     private String mStrSavePath;   							/**< 저장 경로 	*/
+    private int mIntWindowWidth					= 0;
+    private int mIntWindowHeight				= 0;
     
 	private boolean mBoolFirstLoadind 			= false;	/**< 첫 로딩여부	*/
 	private boolean mBoolLandOrientation		= false;	/**< 가로(landscape) 모드 여부 */
@@ -279,6 +281,8 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		DisplayMetrics displayMetrics = new DisplayMetrics();
 	    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);	    
     	WindowManager.LayoutParams lpParams = getWindow().getAttributes();
+    	mIntWindowWidth = displayMetrics.widthPixels;
+    	mIntWindowHeight = displayMetrics.heightPixels;
     	lpParams.width =  displayMetrics.widthPixels-20;
     	lpParams.height = displayMetrics.heightPixels-80;
     	lpParams.screenBrightness = 1;
@@ -501,6 +505,13 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	@SuppressWarnings("deprecation")
 	public void startCameraCapture()
 	{
+		if(mBmCapture != null)
+		{
+			mByteImgData = null;
+			mBmCapture.recycle();
+			mBmCapture = null;
+		}
+		
 		toggleCameraButton(true);
 		
 		mHdrMessageHandler.sendEmptyMessage(R.id.PHOTO_CAMERA_START);
@@ -916,16 +927,14 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	
 	public byte[] byteArrayToBitmap(byte[] byteData) 
     {  
-        Bitmap bitmap = BitmapFactory.decodeByteArray(byteData, 0, byteData.length);
-        int width = bitmap.getWidth(); 
-		int height = bitmap.getHeight(); 
-
 		Matrix matrix = new Matrix();
 		matrix.postRotate(90);
-
-		Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+		
+        Bitmap bitmap = doResizeBitmap(byteData, mIntWindowWidth, mIntWindowHeight);
+		Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 		bitmap.recycle();
 		bitmap = null;
+		
 		if(mBmCapture == null)
 		{
 			Bitmap sampleBitmap = doResizeBitmap(byteData, mSvView.getWidth(), mSvView.getHeight());
@@ -1028,12 +1037,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	public void onAnimationEnd(Animation animation) 
 	{
 		// TODO Auto-generated method stub
-		if(mBmCapture != null)
-		{
-			mByteImgData = null;
-			mBmCapture.recycle();
-			mBmCapture = null;
-		}
+		
 		mImgCapture.setVisibility(View.GONE);
 		mImgCapture.clearAnimation();
 		startCameraCapture();
@@ -1069,11 +1073,11 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
     			
     			if(intVelocity > Constants.SNAP_VELOCITY)
     			{
-    				doAnimation(0, mSvView.getWidth()); //Right
+    				doAnimation(0, mSvView.getWidth()+(mSvView.getWidth()/10)); //Right
     			}
     			else if(intVelocity < -(Constants.SNAP_VELOCITY))
     			{
-    				doAnimation(0, -(mSvView.getWidth())); //Left
+    				doAnimation(0, -(mSvView.getWidth()+(mSvView.getWidth()/10))); //Left
     			}    			
     			mVelocityTracker.recycle();
     			mVelocityTracker = null;	
