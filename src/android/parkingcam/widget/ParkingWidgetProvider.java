@@ -16,6 +16,7 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
@@ -25,6 +26,7 @@ import android.os.Environment;
 import android.parkingcam.R;
 import android.parkingcam.common.Constants;
 import android.parkingcam.map.ParkingMap;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -52,6 +54,7 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 	private static String mStrImageName = "";					/**< 위젯 이미지파일 이름	*/
 	private static int mIntWidth  = Constants.WIDGET_WIDTH;		/**< 위젯 크기(너비)	*/
 	private static int mIntHeight = Constants.WIDGET_HEIGHT;	/**< 위젯 크기(높이)	*/
+	
 	/**
 	 * 브로드캐스트 리시버 이벤트
 	 */
@@ -63,12 +66,21 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 		if(Constants.WIDGET_ACTION_CLS_CLICK.equals(action))
 		{
 			//TODO:: DB 삭제 이벤트 - mStrImageName(PK)
-			File deleteFile = new File(mStrImage);
+			SharedPreferences spfPrefer = PreferenceManager.getDefaultSharedPreferences(context);
+			String strImage = spfPrefer.getString(Constants.WIDGET_IMAGE_PATH, "");
+			System.out.println("RECEIVE STR_IMAGE="+strImage);
+			File deleteFile = new File(strImage);
 			if(deleteFile.exists())
 			{
 				deleteFile.delete();
 				mStrImage = "";
 				mStrImageName = "";
+				SharedPreferences.Editor edit = spfPrefer.edit();
+		    	edit.putString(Constants.WIDGET_IMAGE_PATH,  "");
+		    	edit.commit();
+				spfPrefer = null;
+				edit = null;
+				
 				AppWidgetManager appWidgetMgr = AppWidgetManager.getInstance(context);
 				this.onUpdate(context, appWidgetMgr, appWidgetMgr.getAppWidgetIds(new ComponentName(context, getClass())));
 				Toast.makeText(context, "Delete Image!", Toast.LENGTH_SHORT).show();
@@ -121,7 +133,6 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 	@Override
 	public void onDeleted(Context context, int[] appWidgetIds)
 	{
-		mStrImage = null;
 		super.onDeleted(context, appWidgetIds);
 	}
 	
@@ -150,22 +161,32 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 		mStrImage = getLastImagePath();
 		if("".equals(mStrImage) == false)
 		{
+			SharedPreferences spfPrefer = PreferenceManager.getDefaultSharedPreferences(context);
+			SharedPreferences.Editor edit = spfPrefer.edit();
+	    	edit.putString(Constants.WIDGET_IMAGE_PATH,  mStrImage);
+	    	edit.commit();
+			spfPrefer = null;
+			edit = null;
+	    	
 			Bitmap bitmap = BitmapFactory.decodeFile(mStrImage);
 			bitmap = doResizeBitmap(mIntWidth, mIntHeight);
 			updateViews.setViewVisibility(R.id.btnClose, View.VISIBLE);
 			updateViews.setViewVisibility(R.id.btnGPS, View.VISIBLE);
+			updateViews.setViewVisibility(R.id.parkingImg, View.VISIBLE);
+			updateViews.setViewVisibility(R.id.noImg, View.GONE);
 			updateViews.setImageViewBitmap(R.id.parkingImg, bitmap);
 		}
 		else
 		{
 			updateViews.setViewVisibility(R.id.btnClose, View.GONE);
 			updateViews.setViewVisibility(R.id.btnGPS, View.GONE);
+			updateViews.setViewVisibility(R.id.parkingImg, View.GONE);
+			updateViews.setViewVisibility(R.id.noImg, View.VISIBLE);
 			updateViews.setImageViewResource(R.id.parkingImg, R.drawable.icn_camera);
 		}
 		
 		if("".equals(mStrImageName) == false)
 		{
-			System.out.println("mStrImageName="+mStrImageName);
 			PendingIntent clsClick = PendingIntent.getBroadcast(context, 0, new Intent(Constants.WIDGET_ACTION_CLS_CLICK), PendingIntent.FLAG_UPDATE_CURRENT);
 			updateViews.setOnClickPendingIntent(R.id.btnClose, clsClick);
 			
@@ -233,6 +254,8 @@ public class ParkingWidgetProvider extends AppWidgetProvider
             	}
             }
         }
+        
+        
         return strFileData;
 	}
 	
@@ -248,7 +271,7 @@ public class ParkingWidgetProvider extends AppWidgetProvider
     	options.inPreferredConfig = Config.RGB_565;
 		options.inJustDecodeBounds = true;
     	
-    	BitmapFactory.decodeFile(mStrImage, options);    	
+    	BitmapFactory.decodeFile(mStrImage, options);
     	if(options.outWidth <= 0 || options.outHeight <= 0) return null;
     	
 		float flWidth 	= options.outWidth/width;
@@ -261,7 +284,7 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 		else if(scale >= 2) options.inSampleSize = 2;
 		else options.inSampleSize = 1;
 		
-		options.inJustDecodeBounds = false;		
+		options.inJustDecodeBounds = false;
 		return BitmapFactory.decodeFile(mStrImage, options);
 	}
 }

@@ -8,6 +8,7 @@
     <string name="app_name">ParkingCam</string>
     <string name="dot">.</string>
     <string name="common_confirm">확인</string>
+    <string name="common_start">Start Capture!</string>
     <!-- Common End -->
     
     <!-- Menu Start -->
@@ -51,6 +52,7 @@
 	<string name="wait_capture">Wait a seconds</string>
 	<string name="camera_again">AGAIN</string>
 	<string name="camera_save">SAVE</string>
+	<string name="camera_memo">MEMO</string>
 	<string name="camera_memo_hint">memo</string>
 	<string name="photo_no">등록된 사진이 없습니다.</string> 
 	<string name="photo_request_camera_focus">자동 포커스 설정중...</string>

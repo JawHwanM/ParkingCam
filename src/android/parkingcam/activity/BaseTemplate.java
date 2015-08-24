@@ -46,7 +46,7 @@ public class BaseTemplate extends Activity
 		mCtxContext		= ctxContext;
 		mIntRayoutId	= intRayoutId;
 		
-		setContentView(mIntRayoutId);
+		if(mIntRayoutId != 0) setContentView(mIntRayoutId);
 		mSpfPrefer = PreferenceManager.getDefaultSharedPreferences(getContext());
 		setScreenOrientation();
 	}

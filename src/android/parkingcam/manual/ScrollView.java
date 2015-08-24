@@ -46,10 +46,10 @@ public class ScrollView extends ViewGroup
 	private Bitmap mWallpaper = null;	/**< 배경화면	*/
 	private Paint mPaint = null;
 	
-	private Scroller mScroller = null;	/**< 자동스크롤	*/
-	private PointF mLastPoint = null;	/**< 마지막 터치지점	*/
-	private int mCurPage = 0;			/**< 현재페이지	*/
-	private int mCurTouchState;			/**< 현재 터치 상태	*/
+	private Scroller mScroller = null;		/**< 자동스크롤	*/
+	private PointF mLastPoint = null;		/**< 마지막 터치지점	*/
+	private int mCurPage = 0;				/**< 현재페이지	*/
+	private int mCurTouchState;				/**< 현재 터치 상태	*/
 	
 	private Toast mToast;
 	

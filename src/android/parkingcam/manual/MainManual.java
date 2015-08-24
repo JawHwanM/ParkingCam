@@ -6,10 +6,16 @@
 */
 package android.parkingcam.manual;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.parkingcam.R;
 import android.parkingcam.activity.BaseTemplate;
+import android.parkingcam.camera.CameraCapture;
+import android.parkingcam.common.Constants;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.Toast;
 
 /**
@@ -39,7 +45,7 @@ public class MainManual extends BaseTemplate
     public void onCreate(Bundle savedInstanceState)
     {
     	super.onCreate(savedInstanceState);      
-        
+        super.initTemplate(this, 0);
         initViewControl();
     }
 
@@ -108,7 +114,7 @@ public class MainManual extends BaseTemplate
 	 */
 	private void initViewControl() 
 	{
-		ScrollView sView = new ScrollView(this);
+		final ScrollView sView = new ScrollView(this);
 		View view1 = View.inflate(this, R.layout.manual_1, null);
 		View view2 = View.inflate(this, R.layout.manual_2, null);
 		View view3 = View.inflate(this, R.layout.manual_3, null);
@@ -116,5 +122,26 @@ public class MainManual extends BaseTemplate
 		sView.addView(view2);
 		sView.addView(view3);
 		setContentView(sView);
+		
+		final Button btnStart = (Button)findViewById(R.id.btnStart);
+		if(btnStart != null)
+		{
+			btnStart.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v) 
+				{
+					SharedPreferences.Editor edit = mSpfPrefer.edit();
+					edit.putBoolean(Constants.APP_FIRST_LOADING,  false);
+			    	edit.commit();
+			    	edit = null;
+			    	
+			    	Intent itCameraCapture = new Intent(getContext(), CameraCapture.class);
+			    	startActivity(itCameraCapture);
+			    	
+		        	finish();
+				}				
+			});
+		}
 	}
 }

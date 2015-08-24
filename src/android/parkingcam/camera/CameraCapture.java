@@ -83,6 +83,7 @@ import android.widget.Toast;
 public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callback, AnimationListener // Runnable
 {	
 	private CameraButton mBtnCamera				= null;		/**< 카메라(사진찍기) 버튼	*/
+	private Button mBtnMemo						= null;		/**< 메모 버튼	*/
 	private EditText mTbxPhotoMemo				= null;		/**< 메모	*/
 	private LinearLayout mLlCameraNextMenu		= null;		/**< 카메라 다음 메뉴 레이아웃	*/
 	private ProgressDialog mProgressDialog;
@@ -228,6 +229,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	{	
 		mTbxPhotoMemo		= null;
 		mBtnCamera 			= null;
+		mBtnMemo			= null;
 		mClsCaptureLayout 	= null;
 		mLlCameraNextMenu 	= null;
 		mRlLyaout			= null;
@@ -339,6 +341,20 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 			});
 		}
 		
+		mBtnMemo = (Button)findViewById(R.id.btnMemo);
+		if(mBtnMemo != null)
+		{
+			mBtnMemo.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v) 
+				{
+					mTbxPhotoMemo.setVisibility(View.VISIBLE);
+					v.setVisibility(View.INVISIBLE);
+				}
+			});
+		}
+		 
 		final Button btnAgain = (Button)findViewById(R.id.btnAgain);
 		if(btnAgain != null)
 		{
@@ -360,7 +376,14 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 				@Override
 				public void onClick(View v)
 				{
-					if(AppContext.getLatitude() > 0 && AppContext.getLongitude() > 0)
+					if(doSaveImage())
+					{
+						if(doSaveData())
+						{
+							showToastOnThread("Save complete!");
+						}
+					}
+					/*if(AppContext.getLatitude() > 0 && AppContext.getLongitude() > 0)
 					{
 						if(doSaveImage())
 						{
@@ -373,7 +396,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 					else
 					{
 						showToastOnThread("Location Data Gathering...\nWait a Second...");
-					}
+					}*/
 				}
 			});
 		}
@@ -419,6 +442,8 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		{
 			mBtnCamera.setVisibility(View.GONE);
 			mLlCameraNextMenu.setVisibility(View.VISIBLE);
+			mBtnMemo.setVisibility(View.VISIBLE);
+			mTbxPhotoMemo.setVisibility(View.INVISIBLE);
 			mTbxPhotoMemo.setText("");
 		}
 	}
@@ -1025,6 +1050,7 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 	public void onAnimationStart(Animation animation) 
 	{
 		// TODO Auto-generated method stub
+		startCameraCapture();
 	}
 
 	@Override
@@ -1040,7 +1066,6 @@ public class CameraCapture extends BaseTemplate implements SurfaceHolder.Callbac
 		
 		mImgCapture.setVisibility(View.GONE);
 		mImgCapture.clearAnimation();
-		startCameraCapture();
 	}
 	
 	/**

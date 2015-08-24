@@ -7,9 +7,7 @@
 
 package android.parkingcam;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -72,10 +70,6 @@ public class ParkingCam extends BaseTemplate
     		//TODO:: 사용 설명서 삽입
     		try
         	{
-        		SharedPreferences.Editor edit = mSpfPrefer.edit();
-    	    	edit.putBoolean(Constants.APP_FIRST_LOADING,  false);
-    	    	edit.commit();
-    			
     	    	Intent itMainManual = new Intent(getContext(), MainManual.class);
     			startActivityForResult(itMainManual, 0);
         	}
@@ -90,25 +84,10 @@ public class ParkingCam extends BaseTemplate
     		if(stateOfGPS)
     		{
     			getCurLocation();
-    			Intent itCameraCapture = new Intent(getContext(), CameraCapture.class);
-    			startActivityForResult(itCameraCapture, 0);
     		}
-    		else
-    		{
-    			AlertDialog.Builder alert = new AlertDialog.Builder(ParkingCam.this);
-		    	alert.setTitle("GPS 경고");
-				alert.setMessage("GPS가 꺼져있습니다. 활성화 시켜주세요.");
-				alert.setPositiveButton("확인",  new DialogInterface.OnClickListener()
-				{
-					@Override
-					public void onClick(DialogInterface dialog, int which) 
-					{
-						moveTaskToBack(true);
-						finish();
-					}
-				});
-				alert.show();
-    		}
+    		
+    		Intent itCameraCapture = new Intent(getContext(), CameraCapture.class);
+			startActivityForResult(itCameraCapture, 0);
     	}
 	}
 	
