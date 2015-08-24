@@ -27,8 +27,8 @@ public class Constants
 	public static final String APP_FIRST_LOADING			= "app_first_loading";			/**< 앱 처음실행여부 */
 	public static final String LANDSCAPE_SCREEN_ENABLED_KEY	= "landscape_screen_enabled";	/**< 화면 가로/세로 보기 키 */
 	public static final String WIDGET_IMAGE_PATH			= "widget_image_path";			/**< 위젯 이미지경로 */
+	public static final String WIDGET_IMAGE_FILE			= "widget_image_file";			/**< 위젯 이미지파일 */
 	
-	public static final String TABLE_NAME_USER_INFO		= "USER_INFO";		/**< 사용자 정보 */
 	public static final String TABLE_NAME_PHOTO_INFO	= "PHOTO_INFO";		/**< 사진 정보 */
 	
 	public static final int DEVICE_DISPLAY_MEDIUM 	= 800 * 600;

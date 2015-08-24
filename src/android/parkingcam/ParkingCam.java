@@ -9,7 +9,6 @@ package android.parkingcam;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Criteria;
 import android.location.Location;
@@ -80,6 +79,9 @@ public class ParkingCam extends BaseTemplate
     	}
     	else
     	{
+    		AppContext.setLatitude(0);
+    		AppContext.setLongitude(0);
+    		
     		boolean stateOfGPS = mClsLocationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER);
     		if(stateOfGPS)
     		{

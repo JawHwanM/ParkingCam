@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.parkingcam.R;
 import android.parkingcam.common.Constants;
+import android.parkingcam.data.ParkDBAdapter;
 import android.parkingcam.map.ParkingMap;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -73,10 +74,23 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 			if(deleteFile.exists())
 			{
 				deleteFile.delete();
+				
+				ParkDBAdapter clsDBAdapter = new ParkDBAdapter(context);
+				clsDBAdapter.open();
+		    	clsDBAdapter.beginTransaction();
+		    	String strPhotoDate = spfPrefer.getString(Constants.WIDGET_IMAGE_FILE, "");
+				int intResult = clsDBAdapter.deleteQuery(Constants.TABLE_NAME_PHOTO_INFO, "PHOTO_DATE=?", new String[] {strPhotoDate.toString()});
+				System.out.println("delete Count="+intResult);
+				clsDBAdapter.setTransactionSuccessful();
+				clsDBAdapter.endTransaction();
+				clsDBAdapter.close(); 
+				clsDBAdapter = null;
+				
 				mStrImage = "";
 				mStrImageName = "";
 				SharedPreferences.Editor edit = spfPrefer.edit();
 		    	edit.putString(Constants.WIDGET_IMAGE_PATH,  "");
+		    	edit.putString(Constants.WIDGET_IMAGE_FILE,  "");
 		    	edit.commit();
 				spfPrefer = null;
 				edit = null;
@@ -159,11 +173,12 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 		RemoteViews updateViews = new RemoteViews(context.getPackageName(), R.layout.parking_widget);
 		
 		mStrImage = getLastImagePath();
-		if("".equals(mStrImage) == false)
+		if("".equals(mStrImage) == false && "".equals(mStrImageName) == false)
 		{
 			SharedPreferences spfPrefer = PreferenceManager.getDefaultSharedPreferences(context);
 			SharedPreferences.Editor edit = spfPrefer.edit();
-	    	edit.putString(Constants.WIDGET_IMAGE_PATH,  mStrImage);
+			edit.putString(Constants.WIDGET_IMAGE_PATH,  mStrImage);
+			edit.putString(Constants.WIDGET_IMAGE_FILE,  mStrImageName);
 	    	edit.commit();
 			spfPrefer = null;
 			edit = null;
@@ -175,18 +190,7 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 			updateViews.setViewVisibility(R.id.parkingImg, View.VISIBLE);
 			updateViews.setViewVisibility(R.id.noImg, View.GONE);
 			updateViews.setImageViewBitmap(R.id.parkingImg, bitmap);
-		}
-		else
-		{
-			updateViews.setViewVisibility(R.id.btnClose, View.GONE);
-			updateViews.setViewVisibility(R.id.btnGPS, View.GONE);
-			updateViews.setViewVisibility(R.id.parkingImg, View.GONE);
-			updateViews.setViewVisibility(R.id.noImg, View.VISIBLE);
-			updateViews.setImageViewResource(R.id.parkingImg, R.drawable.icn_camera);
-		}
-		
-		if("".equals(mStrImageName) == false)
-		{
+			
 			PendingIntent clsClick = PendingIntent.getBroadcast(context, 0, new Intent(Constants.WIDGET_ACTION_CLS_CLICK), PendingIntent.FLAG_UPDATE_CURRENT);
 			updateViews.setOnClickPendingIntent(R.id.btnClose, clsClick);
 			
@@ -201,6 +205,14 @@ public class ParkingWidgetProvider extends AppWidgetProvider
 			itMap.setData(Uri.parse(mStrImageName));
 			PendingIntent gpsClick = PendingIntent.getActivity(context, 0, itMap, PendingIntent.FLAG_UPDATE_CURRENT);
 			updateViews.setOnClickPendingIntent(R.id.btnGPS, gpsClick);
+		}
+		else
+		{
+			updateViews.setViewVisibility(R.id.btnClose, View.GONE);
+			updateViews.setViewVisibility(R.id.btnGPS, View.GONE);
+			updateViews.setViewVisibility(R.id.parkingImg, View.GONE);
+			updateViews.setViewVisibility(R.id.noImg, View.VISIBLE);
+			updateViews.setImageViewResource(R.id.parkingImg, R.drawable.icn_camera);
 		}
     	appWidgetMgr.updateAppWidget(appWidgetId, updateViews);
 	}

@@ -6,6 +6,8 @@
 */
 package android.parkingcam.widget;
 
+import java.util.List;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,6 +17,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.parkingcam.R;
 import android.parkingcam.activity.BaseTemplate;
+import android.parkingcam.data.ParkDBResource;
+import android.parkingcam.data.PhotoInfo;
 import android.view.ContextThemeWrapper;
 
 /**
@@ -110,8 +114,9 @@ public class ParkingWidgetDialog extends BaseTemplate
     	Bundle bundle 	= itCurIntent.getExtras();
    		if(bundle != null && "".equals(bundle) == false)
    		{
-   			String strMemo = itCurIntent.getExtras().getString("photoName");
-   			//TODO::Select 구문
+   			String strDate = itCurIntent.getExtras().getString("photoName");
+   			String strMemo = selectMemo(strDate);
+   			if(strMemo == null || "".equals(strMemo)) strMemo = "";
    			
    			AlertDialog.Builder adBuilder = new AlertDialog.Builder(getDialogContext());
    			adBuilder.setIcon(R.drawable.icn_camera);
@@ -136,6 +141,34 @@ public class ParkingWidgetDialog extends BaseTemplate
 			});
             adBuilder.show();
    		}
+	}
+    
+    /**
+	 * 카테고리 코드리스트를 받아온다.
+	 */
+	public String selectMemo(String strPhotoName)
+	{
+		ParkDBResource clsResource = new ParkDBResource(this);
+		List<PhotoInfo> lstPhoto = clsResource.getPhotoInfo(strPhotoName);
+		String strMemo = "";
+		try
+		{	
+			if(lstPhoto != null && lstPhoto.size() > 0)
+			{
+				strMemo = lstPhoto.get(0).getPhotoMemo();
+			}
+		}
+		catch (Exception e)
+		{
+			showToastOnThread("데이터 검색중 에러가 발생하였습니다.");
+			e.printStackTrace();
+		}
+		finally
+		{
+			if(clsResource != null)	{ clsResource = null; }
+			if(lstPhoto != null) { lstPhoto = null; }
+		}
+		return strMemo;
 	}
     
     /**

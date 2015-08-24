@@ -14,13 +14,19 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.Build;
 import android.os.Bundle;
 import android.parkingcam.R;
 import android.parkingcam.activity.GMapTemplate;
-import android.parkingcam.common.Constants;
+import android.parkingcam.data.ParkDBResource;
+import android.parkingcam.data.PhotoInfo;
+import android.view.ContextThemeWrapper;
 
 /**
  * Parking Map
@@ -69,7 +75,6 @@ public class ParkingMap extends GMapTemplate
     {
     	super.onStart();
 		super.setSatellite(mBoolSatellite);
-		doDrawParkingMap();
     }
    
     /**
@@ -142,18 +147,103 @@ public class ParkingMap extends GMapTemplate
 		mFlMapLevel 	= MAP_LEVEL_DEFAULT_VIEW;
 		mStrPhotoName	= "";
 		mStrPhotoMemo	= "";
-		mDblLatitude 	= Constants.MAP_DEFAULT_LAT;
-    	mDblLongitude 	= Constants.MAP_DEFAULT_LNG;
+		mDblLatitude 	= 0.0;
+    	mDblLongitude 	= 0.0;
 		
 		Intent itCurIntent = getIntent();
     	Bundle bundle 	= itCurIntent.getExtras();    	
    		if(bundle != null && "".equals(bundle) == false)
    		{
    			mStrPhotoName = itCurIntent.getExtras().getString("photoName");
-   			//TODO::Select 구문			
+   			selectLocation(mStrPhotoName);
+   			
+   			if(mDblLatitude <= 0.0 || mDblLongitude <= 0.0)
+   			{
+   				AlertDialog.Builder adBuilder = new AlertDialog.Builder(getDialogContext());
+   	   			adBuilder.setIcon(R.drawable.icn_camera);
+   	   			adBuilder.setTitle("PARKING MAP");
+   	            adBuilder.setMessage("위치 데이터가 없습니다.");
+   	            adBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() 
+   	            {
+   	                public void onClick(DialogInterface dialog, int which) 
+   	                {
+   	                    dialog.dismiss();
+   	                    doFinish();
+   	                }
+   	            });
+   	            adBuilder.setOnCancelListener(new DialogInterface.OnCancelListener() 
+   	            {	
+   					@Override
+   					public void onCancel(DialogInterface dialog) 
+   					{
+   						dialog.dismiss();
+   	                    doFinish();
+   					}
+   				});
+   	            adBuilder.show();
+   			}
+   			else
+   			{
+   				doDrawParkingMap();
+   			}
+   	
    		}
 	}
     
+	/**
+	 * 카테고리 코드리스트를 받아온다.
+	 */
+	public void selectLocation(String strPhotoName)
+	{
+		ParkDBResource clsResource = new ParkDBResource(this);
+		List<PhotoInfo> lstPhoto = clsResource.getPhotoInfo(strPhotoName);
+		
+		try
+		{
+			if(lstPhoto != null && lstPhoto.size() > 0)
+			{
+				mStrPhotoMemo = lstPhoto.get(0).getPhotoMemo();
+				mDblLatitude = Double.valueOf(lstPhoto.get(0).getCoordY()).doubleValue();
+				mDblLongitude = Double.valueOf(lstPhoto.get(0).getCoordX()).doubleValue();
+			}
+		}
+		catch (Exception e)
+		{
+			showToastOnThread("데이터 검색중 에러가 발생하였습니다.");
+			e.printStackTrace();
+		}
+		finally
+		{
+			if(clsResource != null)	{ clsResource = null; }
+			if(lstPhoto != null) { lstPhoto = null; }
+		}
+	}
+	
+	/**
+     * Dialog 버전별 테마
+     * @return
+     */
+    private Context getDialogContext() 
+    {
+        final Context context;
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) 
+            context = new ContextThemeWrapper(this, android.R.style.Theme_Holo);
+        else 
+            context = new ContextThemeWrapper(this, android.R.style.Theme_Dialog);
+
+        return context;
+    }
+    
+    /**
+     * Dialog 종료
+     */
+    private void doFinish()
+    {
+    	moveTaskToBack(true);
+    	finish();
+    	android.os.Process.killProcess(android.os.Process.myPid());
+    }
+	
     /**
 	 * 데이터를 조회한다.
 	 */
@@ -182,12 +272,7 @@ public class ParkingMap extends GMapTemplate
 				     .snippet(mStrPhotoMemo)
 				     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)) //BitmapDescriptorFactory.fromResource(R.drawable.icn_leaf)
 				     .draggable(false));
-			super.setZoomCenter(MAP_LEVEL_DETAIL_VIEW, mDblLatitude, mDblLongitude);
-						
-			System.out.println("mStrPhotoName="+mStrPhotoName);
-   			System.out.println("mStrPhotoMemo="+mStrPhotoMemo);
-   			System.out.println("mDblLatitude="+mDblLatitude);
-   			System.out.println("mDblLongitude="+mDblLongitude); 		
+			super.setZoomCenter(MAP_LEVEL_DETAIL_VIEW, mDblLatitude, mDblLongitude);		
 		}
 		catch(Exception ex)
 		{
